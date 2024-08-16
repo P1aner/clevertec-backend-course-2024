@@ -18,7 +18,10 @@ class GitTagVersionCreatorPlugin : Plugin<Project> {
         project.tasks.register("createTag") { task ->
             task.group = "git tag version creator"
             task.doFirst() {
-                if (!GitChecker().hasTagOnCommit()) {
+                if (GitChecker().hasTagOnCommit()) {
+                    println("not commited")
+                    println("commit has tag")
+                } else {
                     val gitListener = GitListener()
                     gitListener.runGitFetch()
                     val majorNumberOfGreatestVersion = TagParser().getMajorNumberOfGreatestVersion()
@@ -53,16 +56,13 @@ class GitTagVersionCreatorPlugin : Plugin<Project> {
 
                     }
 
-                    if (!GitChecker().hasModifiedFiles() && !GitChecker().hasUntrackedFiles()) {
+                    if (GitChecker().hasModifiedFiles() && GitChecker().hasUntrackedFiles()) {
+                        println("$tag.uncommitted")
+                    } else {
                         println(tag)
                         gitListener.createGitTag(tag)
                         gitListener.runGitPush()
-                    } else {
-                        println("$tag.uncommitted")
                     }
-                } else {
-                    println("not commited")
-                    println("commit has tag")
                 }
             }
         }
