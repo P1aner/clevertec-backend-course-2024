@@ -2,69 +2,34 @@ package ru.clevertec
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import ru.clevertec.util.GitChecker
-import ru.clevertec.util.GitListener
-import ru.clevertec.util.TagParser
+import ru.clevertec.extensions.TagExtension
+import ru.clevertec.tasks.CheckGitInstalled
+import ru.clevertec.tasks.CreateTag
+import ru.clevertec.tasks.HasTagOnCommit
+import ru.clevertec.tasks.ShowIntendedTag
 
-private const val MASTER = "master"
-private const val STAGE = "stage/"
-private const val DEV = "dev/"
-private const val QA = "qa/"
+
+private const val GIT_TAG_VERSION_CREATOR = "git tag version creator"
 
 class GitTagVersionCreatorPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
-
-        project.tasks.register("createTag") { task ->
-            task.group = "git tag version creator"
-            task.doFirst() {
-                if (GitChecker().hasTagOnCommit()) {
-                    println("not commited")
-                    println("commit has tag")
-                } else {
-                    val gitListener = GitListener()
-                    gitListener.runGitFetch()
-                    val majorNumberOfGreatestVersion = TagParser().getMajorNumberOfGreatestVersion()
-                    val minorNumberOfGreatestVersion = TagParser().getMinorNumberOfGreatestVersion()
-                    val branch = gitListener.getGitCurrentBranch()
-                    val tag: String
-                    when {
-                        branch.contains(MASTER) -> {
-                            tag = String.format(
-                                "v%d.0",
-                                (majorNumberOfGreatestVersion + 1)
-                            )
-                        }
-
-                        branch.contains(STAGE) -> {
-                            tag = String.format(
-                                "v%d.%d-rc",
-                                majorNumberOfGreatestVersion,
-                                (minorNumberOfGreatestVersion + 1)
-                            )
-                        }
-
-                        branch.contains(DEV) || branch.contains(QA) -> {
-                            tag = String.format(
-                                "v%d.%d",
-                                majorNumberOfGreatestVersion,
-                                (minorNumberOfGreatestVersion + 1)
-                            )
-                        }
-
-                        else -> tag = "v$majorNumberOfGreatestVersion.$minorNumberOfGreatestVersion-SNAPSHOT"
-
-                    }
-
-                    if (GitChecker().hasModifiedFiles() && GitChecker().hasUntrackedFiles()) {
-                        println("$tag.uncommitted")
-                    } else {
-                        println(tag)
-                        gitListener.createGitTag(tag)
-                        gitListener.runGitPush()
-                    }
-                }
-            }
+        project.tasks.register("checkGitInstalled", CheckGitInstalled::class.java) { task ->
+            project.extensions.create("exten", TagExtension::class.java)
+            task.group = GIT_TAG_VERSION_CREATOR
+        }
+        project.tasks.register("checkTagOnCommit", HasTagOnCommit::class.java) { task ->
+            task.dependsOn(":checkGitInstalled")
+            task.group = GIT_TAG_VERSION_CREATOR
+        }
+        project.tasks.register("showIntendedTag", ShowIntendedTag::class.java) { task ->
+            task.dependsOn(":checkTagOnCommit")
+            task.group = GIT_TAG_VERSION_CREATOR
+        }
+        project.tasks.register("createTag", CreateTag::class.java) { task ->
+            task.dependsOn(":showIntendedTag")
+            task.group = GIT_TAG_VERSION_CREATOR
         }
     }
 }
+

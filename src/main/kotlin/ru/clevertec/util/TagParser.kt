@@ -8,11 +8,11 @@ private const val GIT_TAG_VERSION_GROUPS = "v(\\d*)\\.(\\d*)-*[a-z]*"
 
 class TagParser {
 
-    fun getMajorNumberOfGreatestVersion(): Int {
+    fun getMajorNumberOfGreatestVersion(tag: String): Int {
         var major = 0
         var minor = 0
         val matcher: Matcher =
-            Pattern.compile(GIT_TAG_VERSION, Pattern.MULTILINE).matcher(GitListener().getGitTagsOnCurrentCommit())
+            Pattern.compile(GIT_TAG_VERSION, Pattern.MULTILINE).matcher(tag)
         while (matcher.find()) {
             val majorVersion = TagParser().getMajorVersion(matcher.group(0))
             val minorVersion = TagParser().getMinorVersion(matcher.group(0))
@@ -26,11 +26,12 @@ class TagParser {
         return major
     }
 
-    fun getMinorNumberOfGreatestVersion(): Int {
+    fun getMinorNumberOfGreatestVersion(tag: String): Int {
         var major = 0
         var minor = 0
         val matcher: Matcher =
-            Pattern.compile(GIT_TAG_VERSION, Pattern.MULTILINE).matcher(GitListener().getGitTagsOnCurrentCommit())
+            Pattern.compile(GIT_TAG_VERSION, Pattern.MULTILINE)
+                .matcher(tag)
         while (matcher.find()) {
             val majorVersion = TagParser().getMajorVersion(matcher.group(0))
             val minorVersion = TagParser().getMinorVersion(matcher.group(0))

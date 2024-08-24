@@ -1,4 +1,4 @@
-package ru.clevertec.util;
+package ru.clevertec.services
 
 private const val GIT = "git"
 private const val BRANCH = "branch"
@@ -15,7 +15,7 @@ private const val MERGED = "--merged"
 private const val POINTS_AT = "--points-at"
 private const val ORIGIN = "origin"
 
-class GitListener {
+class GitCommandExecutor {
 
     fun createGitTag(version: String) {
         executeGitCommand(TAG, version)
