@@ -17,6 +17,8 @@ repositories {
 }
 
 dependencies {
+    compileOnly("org.projectlombok:lombok:1.18.34")
+    annotationProcessor ("org.projectlombok:lombok:1.18.34")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.platform:junit-platform-suite-api")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$jUnitVersion")

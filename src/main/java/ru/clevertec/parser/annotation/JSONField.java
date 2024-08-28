@@ -1,4 +1,4 @@
-package ru.clevertec.parser;
+package ru.clevertec.parser.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

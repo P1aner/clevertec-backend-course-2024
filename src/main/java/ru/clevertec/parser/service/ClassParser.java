@@ -1,21 +1,31 @@
-package ru.clevertec.parser;
+package ru.clevertec.parser.service;
+
+import lombok.SneakyThrows;
+import ru.clevertec.parser.annotation.JSONField;
+import ru.clevertec.parser.api.JsonToMap;
+import ru.clevertec.parser.api.JsonToObject;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ClassParser {
+public class ClassParser implements JsonToObject {
 
-    public static <T> T parse(Map<String, Object> stringObjectMap, Class<T> tClass) throws
-            InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+    @Override
+    public <T> T parseToObject(String jsonString, Class<T> tClass) {
+        JsonToMap jsonToMap = new JSONValue();
+        Map<String, Object> stringObjectMap = jsonToMap.parseToMap(jsonString);
+        return parseMapToObject(stringObjectMap, tClass);
+    }
 
-        T instance = tClass.newInstance();
+    @SneakyThrows
+    private <T> T parseMapToObject(Map<String, Object> stringObjectMap, Class<T> tClass) {
+        T instance = null;
+        instance = tClass.newInstance();
         Field[] fields = tClass.getDeclaredFields();
         for (Field field : fields) {
             Class<?> fieldType = field.getType();
@@ -44,29 +54,26 @@ public class ClassParser {
         return instance;
     }
 
-    private static Object[] getArray(Class<?> componentType, int arraySize, List listOfObjects) throws
-            InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
-        Object[] array = EmptyObjectGenerator.generateArray(componentType, arraySize);
+    private Object[] getArray(Class<?> componentType, int arraySize, List listOfObjects) {
+        Object[] array = EmptyConteinerGenerator.generateArray(componentType, arraySize);
         for (int i = 0; i < arraySize; i++) {
             array[i] = castTo(componentType, listOfObjects.get(i));
         }
         return array;
     }
 
-
-    private static void setPrimitiveValue(Object t, Field field, Object value) throws
-            IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+    @SneakyThrows
+    private void setPrimitiveValue(Object t, Field field, Object value) {
         String type = field.getGenericType().toString();
         Class clazz = convertPrimitiveToClass(type);
         field.set(t, castTo(clazz, value));
     }
 
-    private static void setArrayValue(Object instance, Field field, Object valueOfMap) throws
-            InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
-        List listOfObjects = (List) valueOfMap;
+    @SneakyThrows
+    private void setArrayValue(Object instance, Field field, Object value) {
+        List listOfObjects = (List) value;
         int arraySize = listOfObjects.size();
-        Class<?> fieldType = field.getType();
-        Class<?> typeComponentType = fieldType.getComponentType();
+        Class<?> typeComponentType = field.getType().getComponentType();
         if (typeComponentType.isPrimitive()) {
             String typePrimitive = typeComponentType.toString();
             Object[] objects = getArray(convertPrimitiveToClass(typePrimitive), arraySize, listOfObjects);
@@ -134,52 +141,38 @@ public class ClassParser {
         }
     }
 
-    private static void setCollectionValue(Object instance, Field field, Object valueOfMap) throws
-            InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
-        List object1 = (ArrayList) valueOfMap;
-        Class<?> fieldType = field.getType();
-        int size = object1.size();
+    @SneakyThrows
+    private void setCollectionValue(Object instance, Field field, Object value) {
+        List objectListValue = (List) value;
         Class clazz;
         try {
-            ParameterizedType genericType2 = (ParameterizedType) field.getGenericType();
-            Type[] typeArguments = genericType2.getActualTypeArguments();
+            ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+            Type[] typeArguments = genericType.getActualTypeArguments();
             clazz = (Class) typeArguments[0];
         } catch (Exception e) {
-            clazz = Object.class;//todo exe
+            throw new RuntimeException(e);
         }
-        Collection collection = EmptyObjectGenerator.generateCollection(fieldType);
-        for (int i = 0; i < size; i++) {
-            collection.add(castTo(clazz, object1.get(i)));
-        }
+        Collection collection = EmptyConteinerGenerator.generateCollection(field.getType());
+        objectListValue.forEach(s -> collection.add(castTo(clazz, s)));
         field.set(instance, collection);
     }
 
-    private static void setMapValue(Object instance, Field field, Object valueOfMap) throws
-            InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
-        Map object1 = (Map) valueOfMap;
-        Class<?> fieldType = field.getType();
-        int size = object1.size();
+    @SneakyThrows
+    private void setMapValue(Object instance, Field field, Object value) {
+        Map valueOfMap = (Map) value;
         Class classKey;
         Class classValue;
-        try {
-            Type[] typeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
-            classKey = (Class) typeArguments[0];
-            classValue = (Class) typeArguments[1];
-        } catch (Exception e) {
-            classKey = Object.class;
-            classValue = Object.class;
-        }
-        Map map = (Map) EmptyObjectGenerator.generateMap(fieldType);
-        Set set = object1.keySet();
-        Object[] array = set.toArray();
-        for (int i = 0; i < size; i++) {
-            map.put(castTo(classKey, array[i]), castTo(classValue, object1.get(array[i])));
-        }
+        Type[] typeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
+        classKey = (Class) typeArguments[0];
+        classValue = (Class) typeArguments[1];
+        Map map = EmptyConteinerGenerator.generateMap(field.getType());
+        Set set = valueOfMap.keySet();
+        set.forEach(s -> map.put(castTo(classKey, s), castTo(classValue, valueOfMap.get(s))));
         field.set(instance, map);
+
     }
 
-
-    private static Class convertPrimitiveToClass(String stringGenericType) {
+    private Class convertPrimitiveToClass(String stringGenericType) {
         return switch (stringGenericType) {
             case "byte" -> Byte.class;
             case "short" -> Short.class;
@@ -189,12 +182,11 @@ public class ClassParser {
             case "double" -> Double.class;
             case "boolean" -> Boolean.class;
             case "char" -> Character.class;
-            default -> null;// throw e
+            default -> throw new RuntimeException("primitive not found");
         };
     }
 
-    private static <T> T castTo(Class tClass, Object value) throws
-            InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+    private <T> T castTo(Class tClass, Object value) {
         Object val;
         if (Byte.class.equals(tClass)) val = Byte.parseByte((String) value);
         else if (Short.class.equals(tClass)) val = Short.parseShort((String) value);
@@ -203,12 +195,9 @@ public class ClassParser {
         else if (Float.class.equals(tClass)) val = Float.parseFloat((String) value);
         else if (Double.class.equals(tClass)) val = Double.parseDouble((String) value);
         else if (Boolean.class.equals(tClass)) val = Boolean.parseBoolean((String) value);
-        else if (Character.class.equals(tClass)) val = Character.codePointAt((String) value, 0);
+        else if (Character.class.equals(tClass)) val = Character.valueOf(((String) value).charAt(0));
         else if (String.class.equals(tClass)) val = String.valueOf(value);
-            //todo is array
-        else val = parse((Map) value, tClass);
-
+        else val = parseMapToObject((Map) value, tClass);
         return (T) val;
     }
-
 }

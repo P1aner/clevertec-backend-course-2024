@@ -1,12 +1,14 @@
-package ru.clevertec.parser;
+package ru.clevertec.parser.service;
 
+
+import ru.clevertec.parser.api.JsonToMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JSONValue {
+public class JSONValue implements JsonToMap {
 
     public static final char CURLY_BRACE_START = '{';
     public static final char CURLY_BRACE_END = '}';
@@ -16,10 +18,7 @@ public class JSONValue {
     public static final char COMMA = ',';
     public static final char COLON = ':';
 
-    private JSONValue() {
-    }
-
-    public static Map<String, Object> parseToMap(String jsonString) {
+    public Map<String, Object> parseToMap(String jsonString) {
         Map<String, Object> map = new HashMap<>();
         StringBuilder jsonStringWithoutCurlyBraces = new StringBuilder(jsonString.trim().substring(1, jsonString.trim().length() - 1));
         StringBuilder key = new StringBuilder();
@@ -69,15 +68,15 @@ public class JSONValue {
         return map;
     }
 
-    private static String excludeObjectString(StringBuilder allStringJson, int startCharOfString) {
+    private String excludeObjectString(StringBuilder allStringJson, int startCharOfString) {
         return excludeString(allStringJson, startCharOfString, CURLY_BRACE_START, CURLY_BRACE_END);
     }
 
-    private static String excludeArrayString(StringBuilder allStringJson, int startCharOfString) {
+    private String excludeArrayString(StringBuilder allStringJson, int startCharOfString) {
         return excludeString(allStringJson, startCharOfString, SQUARE_BRACKET_START, SQUARE_BRACKET_END);
     }
 
-    private static String excludeString(StringBuilder allStringJson, int startCharOfString, char startChar, char endChar) {
+    private String excludeString(StringBuilder allStringJson, int startCharOfString, char startChar, char endChar) {
         StringBuilder excludedObject = new StringBuilder();
         char charAt = allStringJson.charAt(startCharOfString);
         excludedObject.append(charAt);
@@ -92,7 +91,7 @@ public class JSONValue {
         return excludedObject.toString();
     }
 
-    private static List<Object> stringJsonArrayToList(String string) {
+    private List<Object> stringJsonArrayToList(String string) {
         List<Object> list = new ArrayList<>();
         StringBuilder stringBuilder = new StringBuilder(string.trim());
         StringBuilder value = new StringBuilder();
