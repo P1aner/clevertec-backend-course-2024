@@ -12,10 +12,13 @@ abstract class CreateTag : DefaultTask() {
     fun action() {
         val exten = project.extensions.getByType(TagExtension::class.java)
         val tag = exten.tagOnCommit
+        val gitCommandExecutor = GitCommandExecutor()
         if (GitChecker().isGitInstalled() && !GitChecker().hasTagOnCommit() && tag != null) {
-            val gitCommandExecutor = GitCommandExecutor()
             gitCommandExecutor.createGitTag(tag)
+        }
+        if (exten.isGitConnectedToOrigin) {
             gitCommandExecutor.runGitPush()
+            println("tag pushed to origin")
         }
     }
 }

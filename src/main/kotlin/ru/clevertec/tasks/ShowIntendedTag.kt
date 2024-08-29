@@ -6,7 +6,7 @@ import ru.clevertec.extensions.TagExtension
 import ru.clevertec.services.GitChecker
 import ru.clevertec.services.GitCommandExecutor
 import ru.clevertec.services.TagGenerator
-import ru.clevertec.util.TagParser
+import ru.clevertec.services.TagParser
 
 
 abstract class ShowIntendedTag : DefaultTask() {

@@ -5,6 +5,7 @@ import java.util.regex.Pattern
 private const val MODIFIED = "modified:"
 private const val UNTRACKED = "Untracked files:"
 private const val INSTALLED = "not a git repository"
+private const val ORIGIN = "origin"
 
 
 class GitChecker {
@@ -12,6 +13,11 @@ class GitChecker {
     fun isGitInstalled(): Boolean {
         val matcher = Pattern.compile(INSTALLED).matcher(GitCommandExecutor().getGitStatus())
         return !matcher.find()
+    }
+
+    fun isGitConnectedToOrigin(): Boolean {
+        val matcher = Pattern.compile(ORIGIN).matcher(GitCommandExecutor().getGitRemote())
+        return matcher.find()
     }
 
     fun hasTagOnCommit(): Boolean {

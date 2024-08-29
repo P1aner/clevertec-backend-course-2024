@@ -14,6 +14,7 @@ private const val SORT_CREATOR_DATE = "--sort=creatordate"
 private const val MERGED = "--merged"
 private const val POINTS_AT = "--points-at"
 private const val ORIGIN = "origin"
+private const val REMOTE = "remote"
 
 class GitCommandExecutor {
 
@@ -35,6 +36,10 @@ class GitCommandExecutor {
 
     fun getGitStatus(): String {
         return executeGitCommand(STATUS)
+    }
+
+    fun getGitRemote(): String {
+        return executeGitCommand(REMOTE)
     }
 
     fun getGitTagsOnCurrentCommit(): String {

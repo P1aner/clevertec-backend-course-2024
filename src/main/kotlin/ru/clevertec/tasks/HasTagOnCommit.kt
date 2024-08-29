@@ -2,6 +2,7 @@ package ru.clevertec.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import ru.clevertec.exception.GitIsNotInstalledException
 import ru.clevertec.extensions.TagExtension
 import ru.clevertec.services.GitChecker
 
@@ -17,6 +18,8 @@ abstract class HasTagOnCommit : DefaultTask() {
             } else {
                 println("commit not has tag")
             }
+        } else {
+            throw GitIsNotInstalledException("git is not installed")
         }
     }
 }
