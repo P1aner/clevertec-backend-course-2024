@@ -144,10 +144,9 @@ public class ClassParser implements JsonToObject {
     @SneakyThrows
     private void setCollectionValue(Object instance, Field field, Object valueForField) {
         List objectListValue = (List) valueForField;
-        Class clazz;
         ParameterizedType genericType = (ParameterizedType) field.getGenericType();
         Type[] typeArguments = genericType.getActualTypeArguments();
-        clazz = (Class) typeArguments[0];
+        Class clazz = (Class) typeArguments[0];
         Collection collection = EmptyContainerGenerator.generateCollection(field.getType());
         objectListValue.forEach(s -> collection.add(castTo(clazz, s)));
         field.set(instance, collection);
@@ -156,16 +155,13 @@ public class ClassParser implements JsonToObject {
     @SneakyThrows
     private void setMapValue(Object instance, Field field, Object valueForField) {
         Map valueOfMap = (Map) valueForField;
-        Class classKey;
-        Class classValue;
         Type[] typeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
-        classKey = (Class) typeArguments[0];
-        classValue = (Class) typeArguments[1];
+        Class classKey = (Class) typeArguments[0];
+        Class classValue = (Class) typeArguments[1];
         Map map = EmptyContainerGenerator.generateMap(field.getType());
         Set set = valueOfMap.keySet();
         set.forEach(s -> map.put(castTo(classKey, s), castTo(classValue, valueOfMap.get(s))));
         field.set(instance, map);
-
     }
 
     private Class convertPrimitiveToClass(String stringGenericType) {
