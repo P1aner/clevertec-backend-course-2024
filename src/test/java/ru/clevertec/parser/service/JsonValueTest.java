@@ -3,11 +3,12 @@ package ru.clevertec.parser.service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.clevertec.parser.api.JsonToMap;
+import ru.clevertec.parser.exception.IncorrectJsonStringException;
 
 import java.util.List;
 import java.util.Map;
 
-class JSONValueTest {
+class JsonValueTest {
 
     @Test
     void parseToMap() {
@@ -41,7 +42,7 @@ class JSONValueTest {
                   ]
                 }
                 """;
-        JsonToMap jsonToMap = new JSONValue();
+        JsonToMap jsonToMap = new JsonValue();
         Map<String, Object> map = jsonToMap.parseToMap(json);
         Assertions.assertEquals("4", map.get("intId"));
         Assertions.assertEquals("e", map.get("ch"));
@@ -49,5 +50,19 @@ class JSONValueTest {
         Assertions.assertEquals("4.0", map.get("floatOId"));
         Assertions.assertEquals("1", ((List) map.get("intArr")).get(0));
         Assertions.assertEquals("2", ((Map) ((List) map.get("users")).get(0)).get("id"));
+    }
+
+    @Test
+    void parseToMapWithIncorrect() {
+        String json = """
+                                {
+                                  "intId": 4
+                {
+                                }
+                """;
+        JsonToMap jsonToMap = new JsonValue();
+        Assertions.assertThrows(IncorrectJsonStringException.class, () -> {
+            jsonToMap.parseToMap(json);
+        });
     }
 }

@@ -1,9 +1,10 @@
 package ru.clevertec.parser.service;
 
 import lombok.SneakyThrows;
-import ru.clevertec.parser.annotation.JSONField;
+import ru.clevertec.parser.annotation.JsonField;
 import ru.clevertec.parser.api.JsonToMap;
 import ru.clevertec.parser.api.JsonToObject;
+import ru.clevertec.parser.exception.ClassForParseNotFoundException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -17,20 +18,19 @@ public class ClassParser implements JsonToObject {
 
     @Override
     public <T> T parseToObject(String jsonString, Class<T> tClass) {
-        JsonToMap jsonToMap = new JSONValue();
+        JsonToMap jsonToMap = new JsonValue();
         Map<String, Object> stringObjectMap = jsonToMap.parseToMap(jsonString);
         return parseMapToObject(stringObjectMap, tClass);
     }
 
     @SneakyThrows
     private <T> T parseMapToObject(Map<String, Object> stringObjectMap, Class<T> tClass) {
-        T instance = null;
-        instance = tClass.newInstance();
+        T instance = tClass.newInstance();
         Field[] fields = tClass.getDeclaredFields();
         for (Field field : fields) {
             Class<?> fieldType = field.getType();
             String fieldName = field.getName();
-            JSONField annotation = field.getAnnotation(JSONField.class);
+            JsonField annotation = field.getAnnotation(JsonField.class);
             if (annotation != null && !annotation.name().isEmpty()) {
                 fieldName = annotation.name();
             }
@@ -54,8 +54,8 @@ public class ClassParser implements JsonToObject {
         return instance;
     }
 
-    private Object[] getArray(Class<?> componentType, int arraySize, List listOfObjects) {
-        Object[] array = EmptyConteinerGenerator.generateArray(componentType, arraySize);
+    private Object[] getArrayWithObjects(Class<?> componentType, int arraySize, List listOfObjects) {
+        Object[] array = EmptyContainerGenerator.generateArray(componentType, arraySize);
         for (int i = 0; i < arraySize; i++) {
             array[i] = castTo(componentType, listOfObjects.get(i));
         }
@@ -63,20 +63,20 @@ public class ClassParser implements JsonToObject {
     }
 
     @SneakyThrows
-    private void setPrimitiveValue(Object t, Field field, Object value) {
+    private void setPrimitiveValue(Object instance, Field field, Object valueForField) {
         String type = field.getGenericType().toString();
         Class clazz = convertPrimitiveToClass(type);
-        field.set(t, castTo(clazz, value));
+        field.set(instance, castTo(clazz, valueForField));
     }
 
     @SneakyThrows
-    private void setArrayValue(Object instance, Field field, Object value) {
-        List listOfObjects = (List) value;
+    private void setArrayValue(Object instance, Field field, Object valueForField) {
+        List listOfObjects = (List) valueForField;
         int arraySize = listOfObjects.size();
         Class<?> typeComponentType = field.getType().getComponentType();
         if (typeComponentType.isPrimitive()) {
             String typePrimitive = typeComponentType.toString();
-            Object[] objects = getArray(convertPrimitiveToClass(typePrimitive), arraySize, listOfObjects);
+            Object[] objects = getArrayWithObjects(convertPrimitiveToClass(typePrimitive), arraySize, listOfObjects);
             switch (typePrimitive) {
                 case "byte" -> {
                     byte[] array = new byte[arraySize];
@@ -136,36 +136,32 @@ public class ClassParser implements JsonToObject {
                 }
             }
         } else {
-            Object[] array = getArray(typeComponentType, arraySize, listOfObjects);
+            Object[] array = getArrayWithObjects(typeComponentType, arraySize, listOfObjects);
             field.set(instance, array);
         }
     }
 
     @SneakyThrows
-    private void setCollectionValue(Object instance, Field field, Object value) {
-        List objectListValue = (List) value;
+    private void setCollectionValue(Object instance, Field field, Object valueForField) {
+        List objectListValue = (List) valueForField;
         Class clazz;
-        try {
-            ParameterizedType genericType = (ParameterizedType) field.getGenericType();
-            Type[] typeArguments = genericType.getActualTypeArguments();
-            clazz = (Class) typeArguments[0];
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        Collection collection = EmptyConteinerGenerator.generateCollection(field.getType());
+        ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+        Type[] typeArguments = genericType.getActualTypeArguments();
+        clazz = (Class) typeArguments[0];
+        Collection collection = EmptyContainerGenerator.generateCollection(field.getType());
         objectListValue.forEach(s -> collection.add(castTo(clazz, s)));
         field.set(instance, collection);
     }
 
     @SneakyThrows
-    private void setMapValue(Object instance, Field field, Object value) {
-        Map valueOfMap = (Map) value;
+    private void setMapValue(Object instance, Field field, Object valueForField) {
+        Map valueOfMap = (Map) valueForField;
         Class classKey;
         Class classValue;
         Type[] typeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
         classKey = (Class) typeArguments[0];
         classValue = (Class) typeArguments[1];
-        Map map = EmptyConteinerGenerator.generateMap(field.getType());
+        Map map = EmptyContainerGenerator.generateMap(field.getType());
         Set set = valueOfMap.keySet();
         set.forEach(s -> map.put(castTo(classKey, s), castTo(classValue, valueOfMap.get(s))));
         field.set(instance, map);
@@ -182,22 +178,22 @@ public class ClassParser implements JsonToObject {
             case "double" -> Double.class;
             case "boolean" -> Boolean.class;
             case "char" -> Character.class;
-            default -> throw new RuntimeException("primitive not found");
+            default -> throw new ClassForParseNotFoundException("primitive not found");
         };
     }
 
-    private <T> T castTo(Class tClass, Object value) {
-        Object val;
-        if (Byte.class.equals(tClass)) val = Byte.parseByte((String) value);
-        else if (Short.class.equals(tClass)) val = Short.parseShort((String) value);
-        else if (Integer.class.equals(tClass)) val = Integer.parseInt((String) value);
-        else if (Long.class.equals(tClass)) val = Long.parseLong((String) value);
-        else if (Float.class.equals(tClass)) val = Float.parseFloat((String) value);
-        else if (Double.class.equals(tClass)) val = Double.parseDouble((String) value);
-        else if (Boolean.class.equals(tClass)) val = Boolean.parseBoolean((String) value);
-        else if (Character.class.equals(tClass)) val = Character.valueOf(((String) value).charAt(0));
-        else if (String.class.equals(tClass)) val = String.valueOf(value);
-        else val = parseMapToObject((Map) value, tClass);
-        return (T) val;
+    private <T> T castTo(Class tClass, Object valueForField) {
+        Object castedValue;
+        if (Byte.class.equals(tClass)) castedValue = Byte.parseByte((String) valueForField);
+        else if (Short.class.equals(tClass)) castedValue = Short.parseShort((String) valueForField);
+        else if (Integer.class.equals(tClass)) castedValue = Integer.parseInt((String) valueForField);
+        else if (Long.class.equals(tClass)) castedValue = Long.parseLong((String) valueForField);
+        else if (Float.class.equals(tClass)) castedValue = Float.parseFloat((String) valueForField);
+        else if (Double.class.equals(tClass)) castedValue = Double.parseDouble((String) valueForField);
+        else if (Boolean.class.equals(tClass)) castedValue = Boolean.parseBoolean((String) valueForField);
+        else if (Character.class.equals(tClass)) castedValue = Character.valueOf(((String) valueForField).charAt(0));
+        else if (String.class.equals(tClass)) castedValue = String.valueOf(valueForField);
+        else castedValue = parseMapToObject((Map) valueForField, tClass);
+        return (T) castedValue;
     }
 }

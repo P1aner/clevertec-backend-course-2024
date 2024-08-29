@@ -1,9 +1,9 @@
 package ru.clevertec.parser.service.test;
 
-import ru.clevertec.parser.annotation.JSONField;
+import ru.clevertec.parser.annotation.JsonField;
 
 public class Prop {
-    @JSONField(name = "prop")
+    @JsonField(name = "prop")
     private int pr;
 
     public int getPr() {

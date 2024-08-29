@@ -2,13 +2,14 @@ package ru.clevertec.parser.service;
 
 
 import ru.clevertec.parser.api.JsonToMap;
+import ru.clevertec.parser.exception.IncorrectJsonStringException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JSONValue implements JsonToMap {
+public class JsonValue implements JsonToMap {
 
     public static final char CURLY_BRACE_START = '{';
     public static final char CURLY_BRACE_END = '}';
@@ -83,6 +84,8 @@ public class JSONValue implements JsonToMap {
         int bracesCount = 1;
         while (bracesCount > 0) {
             startCharOfString++;
+            if (startCharOfString >= allStringJson.length())
+                throw new IncorrectJsonStringException("Closing symbol not found");
             charAt = allStringJson.charAt(startCharOfString);
             if (charAt == startChar) bracesCount++;
             if (charAt == endChar) bracesCount--;
