@@ -44,7 +44,7 @@ public class EmptyContainerGenerator {
 
     @SneakyThrows
     public static Collection generateCollection(Class<?> clazz) {
-        Collection collection = null;
+        Collection collection;
         if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
             if (Collection.class.equals(clazz)) collection = new ArrayList();
             else if (Set.class.equals(clazz)) collection = new HashSet();
@@ -65,7 +65,7 @@ public class EmptyContainerGenerator {
 
     @SneakyThrows
     public static Map generateMap(Class<?> clazz) {
-        Map map = null;
+        Map map;
         if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
             if (Map.class.equals(clazz)) map = new HashMap();
             else if (SortedMap.class.equals(clazz)) map = new TreeMap();

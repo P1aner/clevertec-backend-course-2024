@@ -3,6 +3,7 @@ plugins {
 }
 
 val jUnitVersion = "5.11.0-M2"
+val lombokVersion = "1.18.34"
 
 group = "ru.clevertec"
 
@@ -17,8 +18,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.projectlombok:lombok:1.18.34")
-    annotationProcessor ("org.projectlombok:lombok:1.18.34")
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
+    annotationProcessor ("org.projectlombok:lombok:$lombokVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.platform:junit-platform-suite-api")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$jUnitVersion")
