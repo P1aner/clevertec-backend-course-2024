@@ -3,25 +3,26 @@ package ru.clevertec.queue;
 import java.util.Arrays;
 import java.util.Comparator;
 
+@SuppressWarnings("unchecked")
 public class CustomPriorityQueue<T> {
     public static final int DEFAULT_CAPACITY = 8;
     private int size = 0;
-    private Object[] inner;
+    private T[] innerArray;
     private Comparator<? super T> comparator;
 
     public CustomPriorityQueue() {
-        this.inner = new Object[DEFAULT_CAPACITY];
+        this.innerArray = (T[]) new Object[DEFAULT_CAPACITY];
     }
 
     public CustomPriorityQueue(int capacity) {
         if (capacity < 1) {
             throw new IllegalArgumentException();
         }
-        this.inner = new Object[capacity];
+        this.innerArray = (T[]) new Object[capacity];
     }
 
     public CustomPriorityQueue(Comparator<? super T> comparator) {
-        this.inner = new Object[DEFAULT_CAPACITY];
+        this.innerArray = (T[]) new Object[DEFAULT_CAPACITY];
         this.comparator = comparator;
     }
 
@@ -29,109 +30,75 @@ public class CustomPriorityQueue<T> {
         if (capacity < 1) {
             throw new IllegalArgumentException();
         }
-        this.inner = new Object[capacity];
+        this.innerArray = (T[]) new Object[capacity];
         this.comparator = comparator;
     }
 
     public void add(T t) {
-        inner[size] = t;
+        if (t == null) {
+            throw new IllegalArgumentException();
+        }
+        innerArray[size] = t;
         size++;
-        if (size > inner.length / 2) {
-            inner = Arrays.copyOf(inner, inner.length * 2);
+        if (size > innerArray.length / 2) {
+            innerArray = Arrays.copyOf(innerArray, innerArray.length * 2);
         }
         if (comparator == null) {
-            siftUpComparable(inner, size - 1);
+            siftUp(size - 1, (Comparator<? super T>) Comparator.naturalOrder());
         } else {
-            siftUpWithComparator(inner, size - 1, comparator);
+            siftUp(size - 1, comparator);
         }
     }
 
     public T peek() {
-        return (T) inner[0];
+        return innerArray[0];
     }
 
     public T poll() {
         if (size == 0) {
             return null;
         }
-        T swap = (T) inner[0];
-        inner[0] = inner[size - 1];
-        inner[size - 1] = null;
+        T swap = innerArray[0];
+        innerArray[0] = innerArray[size - 1];
+        innerArray[size - 1] = null;
         size--;
         if (comparator == null) {
-            siftDownComparable(inner, 0);
+            siftDownFirstElement((Comparator<? super T>) Comparator.naturalOrder());
         } else {
-            siftDownWithComparator(inner, 0, comparator);
+            siftDownFirstElement(comparator);
         }
         return swap;
     }
 
-    private <T> void siftUpWithComparator(Object[] inner, int indexOfRaisedElement, Comparator<? super T> comp) {
-        int child = indexOfRaisedElement;
-        int parent = (child - 1) / 2;
-        while (child > 0 && comp.compare((T) inner[parent], (T) inner[child]) > 0) {
-            swap(inner, child, parent);
-            child = parent;
-            parent = (child - 1) / 2;
+    private void siftUp(int indexOfRaisedElement, Comparator<? super T> comp) {
+        int parent = (indexOfRaisedElement - 1) / 2;
+        while (indexOfRaisedElement > 0 && comp.compare(innerArray[parent], innerArray[indexOfRaisedElement]) > 0) {
+            swapObjectsFromArray(indexOfRaisedElement, parent);
+            indexOfRaisedElement = parent;
+            parent = (indexOfRaisedElement - 1) / 2;
         }
     }
 
-    private void siftUpComparable(Object[] inner, int indexOfRaisedElement) {
-        int child = indexOfRaisedElement;
-        int parent = (child - 1) / 2;
-        while (child > 0 && ((Comparable) inner[parent]).compareTo(inner[child]) > 0) {
-            swap(inner, child, parent);
-            child = parent;
-            parent = (child - 1) / 2;
-        }
-    }
-
-    private <T> void siftDownWithComparator(Object[] inner, int indexOfDownedElement, Comparator<? super T> comp) {
-        int parent = indexOfDownedElement;
-        int leftChild = 2 * parent + 1;
-        int rightChild = 2 * parent + 2;
-        while (leftChild < size &&
-                ((inner[leftChild] != null && comp.compare((T) inner[parent], (T) inner[leftChild]) > 0) ||
-                        (inner[rightChild] != null && comp.compare((T) inner[parent], (T) inner[rightChild]) > 0))) {
-            if (inner[rightChild] != null && comp.compare((T) inner[leftChild], (T) inner[rightChild]) > 0) {
-                if (comp.compare((T) inner[parent], (T) inner[rightChild]) > 0) {
-                    swap(inner, parent, rightChild);
-                    parent = rightChild;
-                }
-            } else if (comp.compare((T) inner[parent], (T) inner[leftChild]) > 0) {
-                swap(inner, parent, leftChild);
-                parent = leftChild;
+    private void siftDownFirstElement(Comparator<? super T> comp) {
+        int indexOfDownedElement = 0;
+        while (indexOfDownedElement < size / 2) {
+            int leftChild = 2 * indexOfDownedElement + 1;
+            int rightChild = 2 * indexOfDownedElement + 2;
+            if (rightChild < size && comp.compare(innerArray[leftChild], innerArray[rightChild]) > 0 && comp.compare(innerArray[indexOfDownedElement], innerArray[rightChild]) > 0) {
+                swapObjectsFromArray(indexOfDownedElement, rightChild);
+                indexOfDownedElement = rightChild;
+            } else if (comp.compare(innerArray[indexOfDownedElement], innerArray[leftChild]) > 0) {
+                swapObjectsFromArray(indexOfDownedElement, leftChild);
+                indexOfDownedElement = leftChild;
+            } else {
+                break;
             }
-            rightChild = 2 * parent + 2;
-            leftChild = 2 * parent + 1;
         }
     }
 
-    private void siftDownComparable(Object[] inner, int indexOfDownedElement) {
-        int parent = indexOfDownedElement;
-        int leftChild = 2 * parent + 1;
-        int rightChild = 2 * parent + 2;
-        while (leftChild < size &&
-                ((inner[leftChild] != null && ((Comparable) inner[parent]).compareTo(inner[leftChild]) > 0) ||
-                        (inner[rightChild] != null && ((Comparable) inner[parent]).compareTo(inner[rightChild]) > 0))) {
-            if (inner[rightChild] != null && ((Comparable) inner[leftChild]).compareTo(inner[rightChild]) > 0) {
-                if (((Comparable) inner[parent]).compareTo(inner[rightChild]) > 0) {
-                    swap(inner, parent, rightChild);
-                    parent = rightChild;
-                }
-            } else if (((Comparable) inner[parent]).compareTo(inner[leftChild]) > 0) {
-                swap(inner, parent, leftChild);
-                parent = leftChild;
-            }
-            rightChild = 2 * parent + 2;
-            leftChild = 2 * parent + 1;
-        }
-    }
-
-
-    private static void swap(Object[] inner, int firstObject, int secondObject) {
-        Object swap = inner[firstObject];
-        inner[firstObject] = inner[secondObject];
-        inner[secondObject] = swap;
+    private void swapObjectsFromArray(int firstObject, int secondObject) {
+        T swap = innerArray[firstObject];
+        innerArray[firstObject] = innerArray[secondObject];
+        innerArray[secondObject] = swap;
     }
 }

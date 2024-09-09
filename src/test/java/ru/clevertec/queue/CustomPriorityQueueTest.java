@@ -20,18 +20,18 @@ class CustomPriorityQueueTest {
         random = new Random();
     }
 
-
     @Test
     void failedCreatedQueue() {
-        Exception thrown1 = Assertions.assertThrows(Exception.class, () -> {
-            CustomPriorityQueue<Integer> integerCustomPriorityQueue = new CustomPriorityQueue<>(-1);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new CustomPriorityQueue<>(-1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new CustomPriorityQueue<>(-1, Comparator.reverseOrder()));
+    }
+
+    @Test
+    void addFailObject() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            CustomPriorityQueue<Integer> integerCustomPriorityQueue = new CustomPriorityQueue<>();
+            integerCustomPriorityQueue.add(null);
         });
-        Assertions.assertEquals(IllegalArgumentException.class, thrown1.getClass());
-        Exception thrown2 = Assertions.assertThrows(Exception.class, () -> {
-            CustomPriorityQueue<Integer> integerCustomPriorityQueue = new CustomPriorityQueue<>(-1, Comparator.reverseOrder()
-            );
-        });
-        Assertions.assertEquals(IllegalArgumentException.class, thrown2.getClass());
     }
 
     @Test
@@ -52,12 +52,11 @@ class CustomPriorityQueueTest {
 
     @Test
     void addNotComparableObject() {
-        Exception thrown = Assertions.assertThrows(Exception.class, () -> {
+        Assertions.assertThrows(Exception.class, () -> {
             CustomPriorityQueue<Student> studentCustomPriorityQueue = new CustomPriorityQueue<>();
             studentCustomPriorityQueue.add(new Student(random.nextInt(0, 6)));
             studentCustomPriorityQueue.add(new Student(random.nextInt(0, 6)));
         });
-        Assertions.assertEquals(ClassCastException.class, thrown.getClass());
     }
 
     @ParameterizedTest
@@ -78,7 +77,6 @@ class CustomPriorityQueueTest {
         Assertions.assertEquals(0, integerMinCustomPriorityQueue.peek().compareTo(minVal));
         Assertions.assertEquals(0, integerMaxCustomPriorityQueue.peek().compareTo(maxVal));
     }
-
 
     @Test
     void poll() {
@@ -113,20 +111,11 @@ class CustomPriorityQueueTest {
         }
     }
 
-    class ComparableStudent implements Comparable<ComparableStudent> {
-        private int course;
-
-        public ComparableStudent(int course) {
-            this.course = course;
-        }
-
-        public int getCourse() {
-            return course;
-        }
+    record ComparableStudent(int course) implements Comparable<ComparableStudent> {
 
         @Override
         public int compareTo(ComparableStudent o) {
-            return o.getCourse();
+            return o.course();
         }
     }
 }
