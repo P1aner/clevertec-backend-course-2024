@@ -17,7 +17,7 @@ import java.util.Set;
 public class PrimitiveFieldInjector implements FieldInjector{
     @Override
     public boolean isSupportedType(Class<?> type) {
-        return false;
+        return type.isPrimitive();
     }
 
     @Override

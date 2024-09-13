@@ -6,15 +6,25 @@ import ru.clevertec.parser.api.JsonToMap;
 import ru.clevertec.parser.api.JsonToObject;
 import ru.clevertec.parser.service.qq.ArrayFieldInjector;
 import ru.clevertec.parser.service.qq.CollectionFieldInjector;
+import ru.clevertec.parser.service.qq.FieldInjector;
 import ru.clevertec.parser.service.qq.MapFieldInjector;
 import ru.clevertec.parser.service.qq.PrimitiveFieldInjector;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class ClassParser implements JsonToObject {
+    private List<FieldInjector> fieldInjectorList;
 
+    public ClassParser() {
+        this.fieldInjectorList = new ArrayList<>();
+        this.fieldInjectorList.add(new PrimitiveFieldInjector());
+        this.fieldInjectorList.add(new CollectionFieldInjector());
+        this.fieldInjectorList.add(new MapFieldInjector());
+        this.fieldInjectorList.add(new ArrayFieldInjector());
+    }
 
     @Override
     public <T> T parseToObject(String jsonString, Class<T> tClass) {
@@ -37,14 +47,11 @@ public class ClassParser implements JsonToObject {
             Object valueOfMap = stringObjectMap.get(fieldName);
             if (valueOfMap != null) {
                 field.setAccessible(true);
-                if (fieldType.isPrimitive()) {
-                    new PrimitiveFieldInjector().injectField(instance, field, valueOfMap);
-                } else if (fieldType.isArray()) {
-                    new ArrayFieldInjector().injectField(instance, field, valueOfMap);
-                } else if (Collection.class.isAssignableFrom(fieldType)) {
-                    new CollectionFieldInjector().injectField(instance, field, valueOfMap);
-                } else if (Map.class.isAssignableFrom(fieldType)) {
-                    new MapFieldInjector().injectField(instance, field, valueOfMap);
+                List<FieldInjector> list = fieldInjectorList.stream()
+                        .filter(s -> s.isSupportedType(fieldType))
+                        .toList();
+                if (!list.isEmpty()) {
+                    list.forEach(s -> s.injectField(instance, field, valueOfMap));
                 } else {
                     field.set(instance, castTo((Class) field.getGenericType(), valueOfMap));
                 }

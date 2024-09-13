@@ -5,10 +5,10 @@ import ru.clevertec.parser.annotation.JsonField;
 import ru.clevertec.parser.exception.ClassForParseNotFoundException;
 import ru.clevertec.parser.service.EmptyContainerGenerator;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +18,7 @@ import java.util.Set;
 public class ArrayFieldInjector implements FieldInjector {
     @Override
     public boolean isSupportedType(Class<?> type) {
-        return type.isPrimitive();
+        return type.isArray();
     }
 
     @Override
@@ -27,70 +27,13 @@ public class ArrayFieldInjector implements FieldInjector {
         List listOfObjects = (List) valueForField;
         int arraySize = listOfObjects.size();
         Class<?> typeComponentType = field.getType().getComponentType();
-        if (typeComponentType.isPrimitive()) {
-            String typePrimitive = typeComponentType.toString();
-            Object[] objects = getArrayWithObjects(convertPrimitiveToClass(typePrimitive), listOfObjects);
-          //  Object[] objects1 = EmptyContainerGenerator.generateArray(typeComponentType, arraySize);
-            switch (typePrimitive) {
-                case "byte" -> {
-                    byte[] array = new byte[arraySize];
-                    for (int i = 0; i < arraySize; i++) {
-                        array[i] = (byte) objects[i];
-                    }
-                    field.set(instance, array);
-                }
-                case "short" -> {
-                    short[] array = new short[arraySize];
-                    for (int i = 0; i < arraySize; i++) {
-                        array[i] = (short) objects[i];
-                    }
-                    field.set(instance, array);
-                }
-                case "int" -> {
-                    int[] array = Arrays.stream(objects)
-                            .mapToInt(i -> (int) i)
-                            .toArray();
-                    field.set(instance, array);
-                }
-                case "long" -> {
-                    long[] array = Arrays.stream(objects)
-                            .mapToLong(l -> (long) l)
-                            .toArray();
-                    field.set(instance, array);
-                }
-                case "float" -> {
-                    float[] array = new float[arraySize];
-                    for (int i = 0; i < arraySize; i++) {
-                        array[i] = (float) objects[i];
-                    }
-                    field.set(instance, array);
-                }
-                case "double" -> {
-                    double[] array = Arrays.stream(objects)
-                            .mapToDouble(d -> (double) d)
-                            .toArray();
-                    field.set(instance, array);
-                }
-                case "boolean" -> {
-                    boolean[] array = new boolean[arraySize];
-                    for (int i = 0; i < arraySize; i++) {
-                        array[i] = (boolean) objects[i];
-                    }
-                    field.set(instance, array);
-                }
-                case "char" -> {
-                    char[] array = new char[arraySize];
-                    for (int i = 0; i < arraySize; i++) {
-                        array[i] = (char) objects[i];
-                    }
-                    field.set(instance, array);
-                }
-                default -> throw new ClassForParseNotFoundException("Unexpected value: " + typePrimitive);
-            }
-        } else {
-            Object[] array = getArrayWithObjects(typeComponentType, listOfObjects);
-            field.set(instance, array);
+        String typePrimitive = typeComponentType.toString();
+        Object[] objects = getArrayWithObjects(convertPrimitiveToClass(typePrimitive), listOfObjects);
+        Object o = Array.newInstance(typeComponentType, arraySize);
+        for (int i = 0; i < arraySize; i++) {
+            Array.set(o, i, objects[i]);
         }
+        field.set(instance, o);
     }
 
     private Object[] getArrayWithObjects(Class<?> componentType, List listOfObjects) {
@@ -98,6 +41,7 @@ public class ArrayFieldInjector implements FieldInjector {
                 .map(s -> castTo(componentType, s))
                 .toArray();
     }
+
     private Class convertPrimitiveToClass(String stringGenericType) {
         return switch (stringGenericType) {
             case "byte" -> Byte.class;
@@ -111,7 +55,9 @@ public class ArrayFieldInjector implements FieldInjector {
             default -> throw new ClassForParseNotFoundException("primitive not found");
         };
     }
+
     private <T> T castTo(Class<T> tClass, Object valueForField) {
+
         Object castedValue;
         if (Byte.class.equals(tClass)) castedValue = Byte.parseByte((String) valueForField);
         else if (Short.class.equals(tClass)) castedValue = Short.parseShort((String) valueForField);
@@ -125,6 +71,7 @@ public class ArrayFieldInjector implements FieldInjector {
         else castedValue = parseMapToObject((Map) valueForField, tClass);
         return (T) castedValue;
     }
+
     @SneakyThrows
     private <T> T parseMapToObject(Map<String, Object> stringObjectMap, Class<T> tClass) {
         T instance = tClass.newInstance();
@@ -160,13 +107,13 @@ public class ArrayFieldInjector implements FieldInjector {
         }
         return instance;
     }
+
     @SneakyThrows
     private void setPrimitiveValue(Object instance, Field field, Object valueForField) {
         String type = field.getGenericType().toString();
         Class clazz = convertPrimitiveToClass(type);
         field.set(instance, castTo(clazz, valueForField));
     }
-
 
 
     @SneakyThrows
@@ -191,6 +138,7 @@ public class ArrayFieldInjector implements FieldInjector {
         set.forEach(s -> map.put(castTo(classKey, s), castTo(classValue, valueOfMap.get(s))));
         field.set(instance, map);
     }
+
     @SneakyThrows
     private void setArrayValue(Object instance, Field field, Object valueForField) {
         List listOfObjects = (List) valueForField;
@@ -199,65 +147,11 @@ public class ArrayFieldInjector implements FieldInjector {
         if (typeComponentType.isPrimitive()) {
             String typePrimitive = typeComponentType.toString();
             Object[] objects = getArrayWithObjects(convertPrimitiveToClass(typePrimitive), listOfObjects);
-            switch (typePrimitive) {
-                case "byte" -> {
-                    byte[] array = new byte[arraySize];
-                    for (int i = 0; i < arraySize; i++) {
-                        array[i] = (byte) objects[i];
-                    }
-                    field.set(instance, array);
-                }
-                case "short" -> {
-                    short[] array = new short[arraySize];
-                    for (int i = 0; i < arraySize; i++) {
-                        array[i] = (short) objects[i];
-                    }
-                    field.set(instance, array);
-                }
-                case "int" -> {
-                    int[] array = Arrays.stream(objects)
-                            .mapToInt(i -> (int) i)
-                            .toArray();
-                    field.set(instance, array);
-                }
-                case "long" -> {
-                    long[] array = Arrays.stream(objects)
-                            .mapToLong(l -> (long) l)
-                            .toArray();
-                    field.set(instance, array);
-                }
-                case "float" -> {
-                    float[] array = new float[arraySize];
-                    for (int i = 0; i < arraySize; i++) {
-                        array[i] = (float) objects[i];
-                    }
-                    field.set(instance, array);
-                }
-                case "double" -> {
-                    double[] array = Arrays.stream(objects)
-                            .mapToDouble(d -> (double) d)
-                            .toArray();
-                    field.set(instance, array);
-                }
-                case "boolean" -> {
-                    boolean[] array = new boolean[arraySize];
-                    for (int i = 0; i < arraySize; i++) {
-                        array[i] = (boolean) objects[i];
-                    }
-                    field.set(instance, array);
-                }
-                case "char" -> {
-                    char[] array = new char[arraySize];
-                    for (int i = 0; i < arraySize; i++) {
-                        array[i] = (char) objects[i];
-                    }
-                    field.set(instance, array);
-                }
-                default -> throw new ClassForParseNotFoundException("Unexpected value: " + typePrimitive);
+            Object o = Array.newInstance(typeComponentType, arraySize);
+            for (int i = 0; i < arraySize; i++) {
+                Array.set(o, i, objects[i]);
             }
-        } else {
-            Object[] array = getArrayWithObjects(typeComponentType, listOfObjects);
-            field.set(instance, array);
+            field.set(instance, o);
         }
     }
 }

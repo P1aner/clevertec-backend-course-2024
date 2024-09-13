@@ -16,8 +16,8 @@ import java.util.Set;
 
 public class MapFieldInjector implements FieldInjector{
     @Override
-    public boolean isSupportedType(Class<?> type) {
-        return false;
+    public boolean isSupportedType(Class<?> fieldType) {
+        return Map.class.isAssignableFrom(fieldType);
     }
 
     @Override

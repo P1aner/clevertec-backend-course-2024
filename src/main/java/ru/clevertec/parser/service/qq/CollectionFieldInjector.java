@@ -16,8 +16,8 @@ import java.util.Set;
 
 public class CollectionFieldInjector implements FieldInjector{
     @Override
-    public boolean isSupportedType(Class<?> type) {
-        return false;
+    public boolean isSupportedType(Class<?> fieldType) {
+        return Collection.class.isAssignableFrom(fieldType);
     }
 
     @Override
