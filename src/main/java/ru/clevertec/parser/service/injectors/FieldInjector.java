@@ -1,4 +1,4 @@
-package ru.clevertec.parser.service.qq;
+package ru.clevertec.parser.service.injectors;
 
 import java.lang.reflect.Field;
 

@@ -2,8 +2,8 @@ package ru.clevertec.parser.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.clevertec.parser.api.JsonToMap;
 import ru.clevertec.parser.exception.IncorrectJsonStringException;
+import ru.clevertec.parser.service.api.JsonToMap;
 
 import java.util.List;
 import java.util.Map;

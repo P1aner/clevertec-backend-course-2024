@@ -2,13 +2,13 @@ package ru.clevertec.parser.service;
 
 import lombok.SneakyThrows;
 import ru.clevertec.parser.annotation.JsonField;
-import ru.clevertec.parser.api.JsonToMap;
-import ru.clevertec.parser.api.JsonToObject;
-import ru.clevertec.parser.service.qq.ArrayFieldInjector;
-import ru.clevertec.parser.service.qq.CollectionFieldInjector;
-import ru.clevertec.parser.service.qq.FieldInjector;
-import ru.clevertec.parser.service.qq.MapFieldInjector;
-import ru.clevertec.parser.service.qq.PrimitiveFieldInjector;
+import ru.clevertec.parser.service.api.JsonToMap;
+import ru.clevertec.parser.service.api.JsonToObject;
+import ru.clevertec.parser.service.injectors.ArrayFieldInjector;
+import ru.clevertec.parser.service.injectors.CollectionFieldInjector;
+import ru.clevertec.parser.service.injectors.FieldInjector;
+import ru.clevertec.parser.service.injectors.MapFieldInjector;
+import ru.clevertec.parser.service.injectors.PrimitiveFieldInjector;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -16,14 +16,13 @@ import java.util.List;
 import java.util.Map;
 
 public class ClassParser implements JsonToObject {
-    private List<FieldInjector> fieldInjectorList;
+    private static final List<FieldInjector> FIELD_INJECTOR_LIST = new ArrayList<>();
 
-    public ClassParser() {
-        this.fieldInjectorList = new ArrayList<>();
-        this.fieldInjectorList.add(new PrimitiveFieldInjector());
-        this.fieldInjectorList.add(new CollectionFieldInjector());
-        this.fieldInjectorList.add(new MapFieldInjector());
-        this.fieldInjectorList.add(new ArrayFieldInjector());
+    static {
+        FIELD_INJECTOR_LIST.add(new PrimitiveFieldInjector());
+        FIELD_INJECTOR_LIST.add(new CollectionFieldInjector());
+        FIELD_INJECTOR_LIST.add(new MapFieldInjector());
+        FIELD_INJECTOR_LIST.add(new ArrayFieldInjector());
     }
 
     @Override
@@ -34,7 +33,7 @@ public class ClassParser implements JsonToObject {
     }
 
     @SneakyThrows
-    private <T> T parseMapToObject(Map<String, Object> stringObjectMap, Class<T> tClass) {
+    public static <T> T parseMapToObject(Map<String, Object> stringObjectMap, Class<T> tClass) {
         T instance = tClass.getDeclaredConstructor().newInstance();
         Field[] fields = tClass.getDeclaredFields();
         for (Field field : fields) {
@@ -47,33 +46,24 @@ public class ClassParser implements JsonToObject {
             Object valueOfMap = stringObjectMap.get(fieldName);
             if (valueOfMap != null) {
                 field.setAccessible(true);
-                List<FieldInjector> list = fieldInjectorList.stream()
+                FIELD_INJECTOR_LIST.stream()
                         .filter(s -> s.isSupportedType(fieldType))
-                        .toList();
-                if (!list.isEmpty()) {
-                    list.forEach(s -> s.injectField(instance, field, valueOfMap));
-                } else {
-                    field.set(instance, castTo((Class) field.getGenericType(), valueOfMap));
-                }
+                        .findAny()
+                        .ifPresentOrElse(s -> s.injectField(instance, field, valueOfMap),
+                                recursiveParsing(field, instance, valueOfMap));
                 field.setAccessible(false);
             }
         }
         return instance;
     }
 
-
-    private <T> T castTo(Class<T> tClass, Object valueForField) {
-        Object castedValue;
-        if (Byte.class.equals(tClass)) castedValue = Byte.parseByte((String) valueForField);
-        else if (Short.class.equals(tClass)) castedValue = Short.parseShort((String) valueForField);
-        else if (Integer.class.equals(tClass)) castedValue = Integer.parseInt((String) valueForField);
-        else if (Long.class.equals(tClass)) castedValue = Long.parseLong((String) valueForField);
-        else if (Float.class.equals(tClass)) castedValue = Float.parseFloat((String) valueForField);
-        else if (Double.class.equals(tClass)) castedValue = Double.parseDouble((String) valueForField);
-        else if (Boolean.class.equals(tClass)) castedValue = Boolean.parseBoolean((String) valueForField);
-        else if (Character.class.equals(tClass)) castedValue = ((String) valueForField).charAt(0);
-        else if (String.class.equals(tClass)) castedValue = String.valueOf(valueForField);
-        else castedValue = parseMapToObject((Map) valueForField, tClass);
-        return (T) castedValue;
+    private static <T> Runnable recursiveParsing(Field field, T instance, Object valueOfMap) {
+        return () -> {
+            try {
+                field.set(instance, ClassCast.castTo((Class<?>) field.getGenericType(), valueOfMap));
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 }

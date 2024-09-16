@@ -1,4 +1,4 @@
-package ru.clevertec.parser.api;
+package ru.clevertec.parser.service.api;
 
 import java.util.Map;
 

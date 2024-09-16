@@ -2,7 +2,7 @@ package ru.clevertec.parser.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.clevertec.parser.api.JsonToObject;
+import ru.clevertec.parser.service.api.JsonToObject;
 import ru.clevertec.parser.service.test.Root;
 
 class ClassParserTest {
