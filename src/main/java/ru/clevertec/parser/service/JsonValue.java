@@ -3,9 +3,15 @@ package ru.clevertec.parser.service;
 
 import ru.clevertec.parser.exception.IncorrectJsonStringException;
 import ru.clevertec.parser.service.api.JsonToMap;
+import ru.clevertec.parser.service.chain.ColonChain;
+import ru.clevertec.parser.service.chain.CommaChain;
+import ru.clevertec.parser.service.chain.CurlyBraceChain;
+import ru.clevertec.parser.service.chain.JsonAndMapContainer;
+import ru.clevertec.parser.service.chain.OtherChain;
+import ru.clevertec.parser.service.chain.QuoteChain;
+import ru.clevertec.parser.service.chain.SquareBracketChain;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,60 +34,21 @@ public class JsonValue implements JsonToMap {
     }
 
 
-    public Map<String, Object> parseToMap(StringBuilder jsonStringWithoutCurlyBraces) {
-
-        Map<String, Object> map = new HashMap<>();
-        StringBuilder key = new StringBuilder();
-        StringBuilder value = new StringBuilder();
-        boolean isKey = true;
-
-        while (!jsonStringWithoutCurlyBraces.isEmpty()) {
-            char charAt = jsonStringWithoutCurlyBraces.charAt(0);
-            jsonStringWithoutCurlyBraces.deleteCharAt(0);
-            if (charAt == QUOTE) {
-                String substring = excludeStringValue(jsonStringWithoutCurlyBraces);
-                if (isKey) {
-                    key.append(substring);
-                    isKey = false;
-                } else {
-                    value.append(substring);
-                    map.put(key.toString().trim(), value.toString().trim());
-                    key = new StringBuilder();
-                    value = new StringBuilder();
-                    isKey = true;
-                }
-            } else if (charAt == COLON) {
-                value = new StringBuilder();
-                isKey = false;
-            } else if (charAt == COMMA) {
-                if (!value.isEmpty()) {
-                    map.put(key.toString().trim(), value.toString().trim());
-                    key = new StringBuilder();
-                    value = new StringBuilder();
-                    isKey = true;
-                }
-            } else if (charAt == CURLY_BRACE_START) {
-                map.put(key.toString().trim(), parseToMap(new StringBuilder(excludeObjectString(jsonStringWithoutCurlyBraces).trim())));
-                key = new StringBuilder();
-                value = new StringBuilder();
-                isKey = true;
-            } else if (charAt == SQUARE_BRACKET_START) {
-                map.put(key.toString().trim(), stringJsonArrayToList(excludeArrayString(jsonStringWithoutCurlyBraces).trim()));
-                key = new StringBuilder();
-                value = new StringBuilder();
-                isKey = true;
-            } else {
-                value.append(charAt);
-            }
-            if (!isKey) {
-                map.put(key.toString().trim(), value.toString().trim());
-            }
+    public static Map<String, Object> parseToMap(StringBuilder jsonStringWithoutCurlyBraces) {
+        JsonAndMapContainer jsonAndMapContainer = new JsonAndMapContainer(jsonStringWithoutCurlyBraces);
+        while (jsonAndMapContainer.hasNext()) {//todo цепочка
+            QuoteChain.execute(jsonAndMapContainer);
+            ColonChain.execute(jsonAndMapContainer);
+            CommaChain.execute(jsonAndMapContainer);
+            CurlyBraceChain.execute(jsonAndMapContainer);
+            SquareBracketChain.execute(jsonAndMapContainer);
+            OtherChain.execute(jsonAndMapContainer);
         }
-        return map;
+        return jsonAndMapContainer.getMap();
     }
 
 
-    private List<Object> stringJsonArrayToList(String string) {
+    public static List<Object> stringJsonArrayToList(String string) {
         List<Object> list = new ArrayList<>();
         StringBuilder stringBuilder = new StringBuilder(string.trim());
         StringBuilder value = new StringBuilder();
@@ -92,7 +59,7 @@ public class JsonValue implements JsonToMap {
             if (charAt == QUOTE) {
                 list.add(excludeStringValue(stringBuilder).trim());
                 value = new StringBuilder();
-            }else if (charAt == CURLY_BRACE_START) {
+            } else if (charAt == CURLY_BRACE_START) {
                 list.add(parseToMap(new StringBuilder(excludeObjectString(stringBuilder))));
                 value = new StringBuilder();
             } else if (charAt == SQUARE_BRACKET_START) {
@@ -101,7 +68,7 @@ public class JsonValue implements JsonToMap {
             } else if (charAt == COMMA && !value.isEmpty()) {
                 list.add(value.toString().trim());
                 value = new StringBuilder();
-            }  else {
+            } else {
                 value.append(charAt);
             }
         }
@@ -111,19 +78,19 @@ public class JsonValue implements JsonToMap {
         return list;
     }
 
-    private String excludeObjectString(StringBuilder allStringJson) {
+    public static String excludeObjectString(StringBuilder allStringJson) {
         return excludeStringValue(allStringJson, CURLY_BRACE_START, CURLY_BRACE_END);
     }
 
-    private String excludeStringValue(StringBuilder allStringJson) {
+    public static String excludeStringValue(StringBuilder allStringJson) {
         return excludeStringValue(allStringJson, QUOTE, QUOTE);
     }
 
-    private String excludeArrayString(StringBuilder allStringJson) {
+    public static String excludeArrayString(StringBuilder allStringJson) {
         return excludeStringValue(allStringJson, SQUARE_BRACKET_START, SQUARE_BRACKET_END);
     }
 
-    private String excludeStringValue(StringBuilder allStringJson, char startChar, char endChar) {
+    public static String excludeStringValue(StringBuilder allStringJson, char startChar, char endChar) {
         StringBuilder excludedObject = new StringBuilder();
         int bracesCount = 1;
         char charAt;
