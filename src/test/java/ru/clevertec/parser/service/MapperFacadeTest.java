@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import ru.clevertec.parser.service.api.JsonToObject;
 import ru.clevertec.parser.service.test.Root;
 
-class ClassParserTest {
+class MapperFacadeTest {
 
     @Test
     void parseToObject() {
@@ -72,7 +72,7 @@ class ClassParserTest {
                   }
                 }
                 """;
-        JsonToObject classParser = new ClassParser();
+        JsonToObject classParser = new MapperFacade();
         Root root = classParser.parseToObject(json, Root.class);
         Assertions.assertFalse(root.isBool());
         Assertions.assertEquals(false, root.getBoolO());
@@ -104,7 +104,7 @@ class ClassParserTest {
                   "intId": 4
                 }
                 """;
-        JsonToObject classParser = new ClassParser();
+        JsonToObject classParser = new MapperFacade();
         Root root = classParser.parseToObject(json, Root.class);
         Assertions.assertEquals(4, root.getIntId());
         Assertions.assertNull(root.getIntOId());

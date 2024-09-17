@@ -3,7 +3,11 @@ package ru.clevertec.parser.service;
 import lombok.SneakyThrows;
 import ru.clevertec.parser.exception.ClassForParseNotFoundException;
 
+import javax.print.attribute.UnmodifiableSetException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -49,7 +53,7 @@ public class ClassCast {
         if (caster != null) {
             return tClass.cast(caster.apply((String) valueForField));
         } else {
-            return tClass.cast(ClassParser.parseMapToObject((Map<String, Object>) valueForField, tClass));
+            return tClass.cast(MapToObjectParser.parseMapToObject((Map<String, Object>) valueForField, tClass));
         }
     }
 }

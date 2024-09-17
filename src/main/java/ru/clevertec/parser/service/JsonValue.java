@@ -19,19 +19,27 @@ public class JsonValue implements JsonToMap {
     public static final char COMMA = ',';
     public static final char COLON = ':';
 
+    @Override
     public Map<String, Object> parseToMap(String jsonString) {
+        String substring = jsonString.trim().substring(1, jsonString.trim().length() - 1);
+        String replace = substring.replace('\n', ' ');
+        StringBuilder jsonStringWithoutCurlyBraces = new StringBuilder(replace);
+        return parseToMap(jsonStringWithoutCurlyBraces);
+    }
+
+
+    public Map<String, Object> parseToMap(StringBuilder jsonStringWithoutCurlyBraces) {
+
         Map<String, Object> map = new HashMap<>();
-        StringBuilder jsonStringWithoutCurlyBraces = new StringBuilder(jsonString.trim().substring(1, jsonString.trim().length() - 1));
         StringBuilder key = new StringBuilder();
         StringBuilder value = new StringBuilder();
         boolean isKey = true;
 
-        for (int i = 0; i < jsonStringWithoutCurlyBraces.length(); i++) {
-            char charAt = jsonStringWithoutCurlyBraces.charAt(i);
+        while (!jsonStringWithoutCurlyBraces.isEmpty()) {
+            char charAt = jsonStringWithoutCurlyBraces.charAt(0);
+            jsonStringWithoutCurlyBraces.deleteCharAt(0);
             if (charAt == QUOTE) {
-                String s = excludeStringValue(jsonStringWithoutCurlyBraces, i);
-                String substring = s.substring(1, s.length() - 1);
-                i += s.length() - 1;
+                String substring = excludeStringValue(jsonStringWithoutCurlyBraces);
                 if (isKey) {
                     key.append(substring);
                     isKey = false;
@@ -53,17 +61,12 @@ public class JsonValue implements JsonToMap {
                     isKey = true;
                 }
             } else if (charAt == CURLY_BRACE_START) {
-                String excluded = excludeObjectString(jsonStringWithoutCurlyBraces, i);
-                i += excluded.length() - 1;
-                map.put(key.toString().trim(), parseToMap(excluded.trim()));
+                map.put(key.toString().trim(), parseToMap(new StringBuilder(excludeObjectString(jsonStringWithoutCurlyBraces).trim())));
                 key = new StringBuilder();
                 value = new StringBuilder();
                 isKey = true;
             } else if (charAt == SQUARE_BRACKET_START) {
-                String arrayString = excludeArrayString(jsonStringWithoutCurlyBraces, i);
-                i += arrayString.length() - 1;
-                String substring = arrayString.substring(1, arrayString.length() - 1);
-                map.put(key.toString().trim(), stringJsonArrayToList(substring.trim()));
+                map.put(key.toString().trim(), stringJsonArrayToList(excludeArrayString(jsonStringWithoutCurlyBraces).trim()));
                 key = new StringBuilder();
                 value = new StringBuilder();
                 isKey = true;
@@ -83,30 +86,22 @@ public class JsonValue implements JsonToMap {
         StringBuilder stringBuilder = new StringBuilder(string.trim());
         StringBuilder value = new StringBuilder();
 
-        for (int i = 0; i < stringBuilder.length(); i++) {
-            char charAt = stringBuilder.charAt(i);
+        while (!stringBuilder.isEmpty()) {
+            char charAt = stringBuilder.charAt(0);
+            stringBuilder.deleteCharAt(0);
             if (charAt == QUOTE) {
-                String s = excludeStringValue(stringBuilder, i);
-                String substring = s.substring(1, s.length() - 1);
-                value.append(substring);
-                i += s.length() - 1;
-                list.add(value.toString().trim());
+                list.add(excludeStringValue(stringBuilder).trim());
+                value = new StringBuilder();
+            }else if (charAt == CURLY_BRACE_START) {
+                list.add(parseToMap(new StringBuilder(excludeObjectString(stringBuilder))));
+                value = new StringBuilder();
+            } else if (charAt == SQUARE_BRACKET_START) {
+                list.add(stringJsonArrayToList(excludeArrayString(stringBuilder)));
                 value = new StringBuilder();
             } else if (charAt == COMMA && !value.isEmpty()) {
                 list.add(value.toString().trim());
                 value = new StringBuilder();
-            } else if (charAt == CURLY_BRACE_START) {
-                String excluded = excludeObjectString(stringBuilder, i);
-                i += excluded.length() - 1;
-                list.add(parseToMap(excluded));
-                value = new StringBuilder();
-            } else if (charAt == SQUARE_BRACKET_START) {
-                String str = excludeArrayString(stringBuilder, i);
-                i += str.length() - 1;
-                String substring = str.substring(1, str.length() - 1);
-                list.add(stringJsonArrayToList(substring));
-                value = new StringBuilder();
-            } else {
+            }  else {
                 value.append(charAt);
             }
         }
@@ -116,32 +111,31 @@ public class JsonValue implements JsonToMap {
         return list;
     }
 
-    private String excludeObjectString(StringBuilder allStringJson, int startCharOfString) {
-        return excludeStringValue(allStringJson, startCharOfString, CURLY_BRACE_START, CURLY_BRACE_END);
+    private String excludeObjectString(StringBuilder allStringJson) {
+        return excludeStringValue(allStringJson, CURLY_BRACE_START, CURLY_BRACE_END);
     }
 
-    private String excludeStringValue(StringBuilder allStringJson, int startCharOfString) {
-        return excludeStringValue(allStringJson, startCharOfString, QUOTE, QUOTE);
+    private String excludeStringValue(StringBuilder allStringJson) {
+        return excludeStringValue(allStringJson, QUOTE, QUOTE);
     }
 
-    private String excludeArrayString(StringBuilder allStringJson, int startCharOfString) {
-        return excludeStringValue(allStringJson, startCharOfString, SQUARE_BRACKET_START, SQUARE_BRACKET_END);
+    private String excludeArrayString(StringBuilder allStringJson) {
+        return excludeStringValue(allStringJson, SQUARE_BRACKET_START, SQUARE_BRACKET_END);
     }
 
-    private String excludeStringValue(StringBuilder allStringJson, int startCharOfString, char startChar, char endChar) {
+    private String excludeStringValue(StringBuilder allStringJson, char startChar, char endChar) {
         StringBuilder excludedObject = new StringBuilder();
-        char charAt = allStringJson.charAt(startCharOfString);
-        excludedObject.append(charAt);
         int bracesCount = 1;
-        while (bracesCount > 0) {
-            startCharOfString++;
-            if (startCharOfString >= allStringJson.length())
-                throw new IncorrectJsonStringException("Closing symbol not found");
-            charAt = allStringJson.charAt(startCharOfString);
+        char charAt;
+        while (bracesCount > 0 && !allStringJson.isEmpty()) {
+            charAt = allStringJson.charAt(0);
             if (charAt == endChar) bracesCount--;
             else if (charAt == startChar) bracesCount++;
             excludedObject.append(charAt);
+            allStringJson.deleteCharAt(0);
         }
+        if (bracesCount > 0) throw new IncorrectJsonStringException("Closing symbol not found");
+        excludedObject.deleteCharAt(excludedObject.length() - 1);
         return excludedObject.toString();
     }
 }
