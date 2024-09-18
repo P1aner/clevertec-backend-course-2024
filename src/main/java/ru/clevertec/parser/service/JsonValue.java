@@ -36,7 +36,7 @@ public class JsonValue implements JsonToMap {
 
     public Map<String, Object> parseToMap(StringBuilder jsonStringWithoutCurlyBraces) {
         JsonAndMapContainer jsonAndMapContainer = new JsonAndMapContainer(jsonStringWithoutCurlyBraces);
-        while (jsonAndMapContainer.hasNext()) {//todo паттерн цепочка обязанностей
+        while (jsonAndMapContainer.hasNext()) {
             startChain.execute(jsonAndMapContainer);
         }
         return jsonAndMapContainer.getMap();
