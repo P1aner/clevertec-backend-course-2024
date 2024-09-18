@@ -72,7 +72,7 @@ class MapperFacadeTest {
                   }
                 }
                 """;
-        JsonToObject classParser = new MapperFacade();
+        JsonToObject classParser = new MapperFacadeProxy(new MapperFacade());
         Root root = classParser.parseToObject(json, Root.class);
         Assertions.assertFalse(root.isBool());
         Assertions.assertEquals(false, root.getBoolO());
