@@ -1,13 +1,16 @@
 package ru.clevertec.parser.service.chain;
 
-import static ru.clevertec.parser.service.JsonValue.COLON;
-import static ru.clevertec.parser.service.JsonValue.COMMA;
-import static ru.clevertec.parser.service.JsonValue.CURLY_BRACE_START;
-import static ru.clevertec.parser.service.JsonValue.QUOTE;
-import static ru.clevertec.parser.service.JsonValue.SQUARE_BRACKET_START;
 
-public class OtherChain {
-    public static void execute(JsonAndMapContainer jsonAndMapContainer) {
+import static ru.clevertec.parser.utils.DefaultJsonChars.COLON;
+import static ru.clevertec.parser.utils.DefaultJsonChars.COMMA;
+import static ru.clevertec.parser.utils.DefaultJsonChars.CURLY_BRACE_START;
+import static ru.clevertec.parser.utils.DefaultJsonChars.QUOTE;
+import static ru.clevertec.parser.utils.DefaultJsonChars.SQUARE_BRACKET_START;
+
+public class OtherChain implements Chain {
+
+    @Override
+    public void execute(JsonAndMapContainer jsonAndMapContainer) {
         if (jsonAndMapContainer.hasNext()) {
             char firsChar;
             do {

@@ -1,14 +1,17 @@
 package ru.clevertec.parser.service.chain;
 
-import static ru.clevertec.parser.service.JsonValue.QUOTE;
-import static ru.clevertec.parser.service.JsonValue.excludeStringValue;
+import ru.clevertec.parser.utils.StringExtractor;
 
-public class QuoteChain {
+import static ru.clevertec.parser.utils.DefaultJsonChars.QUOTE;
 
-    public static void execute(JsonAndMapContainer jsonAndMapContainer) {
+
+public record QuoteChain(Chain nextElement) implements Chain {
+
+    @Override
+    public void execute(JsonAndMapContainer jsonAndMapContainer) {
         if (jsonAndMapContainer.hasNext() && jsonAndMapContainer.getFirsChar() == QUOTE) {
             jsonAndMapContainer.excludeChar();
-            String substring = excludeStringValue(jsonAndMapContainer.getDefaultValue());
+            String substring = StringExtractor.extractStringValue(jsonAndMapContainer.getDefaultValue());
             if (jsonAndMapContainer.getIsKey()) {
                 jsonAndMapContainer.getKeyString().append(substring);
                 jsonAndMapContainer.revertKey();
@@ -16,6 +19,9 @@ public class QuoteChain {
                 jsonAndMapContainer.getValueString().append(substring);
                 jsonAndMapContainer.createNewRow();
             }
+        }
+        if (jsonAndMapContainer.hasNext()) {
+            nextElement.execute(jsonAndMapContainer);
         }
     }
 }

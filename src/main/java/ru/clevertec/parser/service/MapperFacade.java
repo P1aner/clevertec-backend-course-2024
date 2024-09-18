@@ -8,7 +8,7 @@ import java.util.Map;
 public class MapperFacade implements JsonToObject {
     private final JsonToMap jsonToMap;
 
-    public MapperFacade() {//todo фасад
+    public MapperFacade() {//todo паттерн фасад
         this.jsonToMap = new JsonValue();
     }
 

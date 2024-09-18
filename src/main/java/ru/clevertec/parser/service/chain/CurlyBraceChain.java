@@ -1,15 +1,21 @@
 package ru.clevertec.parser.service.chain;
 
 import ru.clevertec.parser.service.JsonValue;
+import ru.clevertec.parser.utils.StringExtractor;
 
-import static ru.clevertec.parser.service.JsonValue.CURLY_BRACE_START;
-import static ru.clevertec.parser.service.JsonValue.excludeObjectString;
+import static ru.clevertec.parser.utils.DefaultJsonChars.CURLY_BRACE_START;
 
-public class CurlyBraceChain {
-    public static void execute(JsonAndMapContainer jsonAndMapContainer) {
+public record CurlyBraceChain(Chain nextElement) implements Chain {
+
+    @Override
+    public void execute(JsonAndMapContainer jsonAndMapContainer) {
         if (jsonAndMapContainer.hasNext() && jsonAndMapContainer.getFirsChar() == CURLY_BRACE_START) {
             jsonAndMapContainer.excludeChar();
-            jsonAndMapContainer.createNewRow(JsonValue.parseToMap(new StringBuilder(excludeObjectString(jsonAndMapContainer.getDefaultValue()).trim())));
+            StringBuilder jsonStringWithoutCurlyBraces = new StringBuilder(StringExtractor.extractObjectString(jsonAndMapContainer.getDefaultValue()).trim());
+            jsonAndMapContainer.createNewRow(new JsonValue().parseToMap(jsonStringWithoutCurlyBraces));
+        }
+        if (jsonAndMapContainer.hasNext()) {
+            nextElement.execute(jsonAndMapContainer);
         }
     }
 }
