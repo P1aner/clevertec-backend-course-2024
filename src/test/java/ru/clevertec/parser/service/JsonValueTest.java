@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.clevertec.parser.exception.IncorrectJsonStringException;
 import ru.clevertec.parser.service.api.JsonToMap;
+import ru.clevertec.parser.service.test.JsonStringData;
 
 import java.util.List;
 import java.util.Map;
@@ -12,38 +13,8 @@ class JsonValueTest {
 
     @Test
     void parseToMap() {
-        String json = """
-                {
-                  "intId": 4,
-                  "ch": "e",
-                  "bool": false,
-                  "floatOId": 4.0,
-                  "intArr": [
-                    1,
-                    2,
-                    3,
-                    4
-                  ],
-                  "users": [
-                    {
-                      "id": "2",
-                      "name": "Test",
-                      "prop": [
-                        {
-                          "prop": 1
-                        },
-                        {
-                          "prop": 2
-                        }
-                      ]
-                    }
-                      ]
-                    }
-                  ]
-                }
-                """;
         JsonToMap jsonToMap = new JsonValue();
-        Map<String, Object> map = jsonToMap.parseToMap(json);
+        Map<String, Object> map = jsonToMap.parseToMap(JsonStringData.STRING_SIMPLE_OBJECT);
         Assertions.assertEquals("4", map.get("intId"));
         Assertions.assertEquals("e", map.get("ch"));
         Assertions.assertEquals("false", map.get("bool"));
@@ -54,15 +25,9 @@ class JsonValueTest {
 
     @Test
     void parseToMapWithIncorrect() {
-        String json = """
-                                {
-                                  "intId": 4
-                {
-                                }
-                """;
         JsonToMap jsonToMap = new JsonValue();
         Assertions.assertThrows(IncorrectJsonStringException.class, () -> {
-            jsonToMap.parseToMap(json);
+            jsonToMap.parseToMap(JsonStringData.INCORRECT_JSON);
         });
     }
 }

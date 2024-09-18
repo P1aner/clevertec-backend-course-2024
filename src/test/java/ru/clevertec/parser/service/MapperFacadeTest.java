@@ -3,77 +3,15 @@ package ru.clevertec.parser.service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.clevertec.parser.service.api.JsonToObject;
+import ru.clevertec.parser.service.test.JsonStringData;
 import ru.clevertec.parser.service.test.Root;
 
 class MapperFacadeTest {
 
     @Test
     void parseToObject() {
-        String json = """
-                {
-                  "intId": 4,
-                  "longId": 4,
-                  "doubleId": 4,
-                  "byteId": 4,
-                  "shortId": 4,
-                  "floatId": 4.0,
-                  "ch": "e",
-                  "bool": false,
-                  "intOId": 4,
-                  "longOId": 4,
-                  "doubleOId": 4,
-                  "byteOId": 4,
-                  "shortOId": 4,
-                  "floatOId": 4.0,
-                  "chO": "e",
-                  "boolO": false,
-                  "useridString": "user_id_value",
-                  "intArr": [
-                    1,
-                    2,
-                    3,
-                    4
-                  ],
-                  "intList": [
-                    1,
-                    2,
-                    3,
-                    4
-                  ],
-                  "users": [
-                    {
-                      "id": "2",
-                      "name": "Test",
-                      "prop": [
-                        {
-                          "prop": 1
-                        },
-                        {
-                          "prop": 2
-                        }
-                      ]
-                    },
-                    {
-                      "id": "6",
-                      "name": "Test name",
-                      "prop": [
-                        {
-                          "prop": 1
-                        },
-                        {
-                          "prop": 2
-                        }
-                      ]
-                    }
-                  ],
-                  "map": {
-                    "1": "2",
-                    "3": "4"
-                  }
-                }
-                """;
         JsonToObject classParser = new MapperFacadeProxy(new MapperFacade());
-        Root root = classParser.parseToObject(json, Root.class);
+        Root root = classParser.parseToObject(JsonStringData.STRING_HARD_OBJECT, Root.class);
         Assertions.assertFalse(root.isBool());
         Assertions.assertEquals(false, root.getBoolO());
         Assertions.assertEquals(4, root.getByteId());
@@ -99,13 +37,8 @@ class MapperFacadeTest {
 
     @Test
     void parseToObjectWithNull() {
-        String json = """
-                {
-                  "intId": 4
-                }
-                """;
         JsonToObject classParser = new MapperFacade();
-        Root root = classParser.parseToObject(json, Root.class);
+        Root root = classParser.parseToObject(JsonStringData.JSON_WITH_NULL, Root.class);
         Assertions.assertEquals(4, root.getIntId());
         Assertions.assertNull(root.getIntOId());
     }
