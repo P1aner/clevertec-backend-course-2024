@@ -16,7 +16,7 @@ public class JsonSendCommand implements Command {
     }
 
     @Override
-    public <T> T execute() {//todo паттерн комманда
+    public <T> T execute() {//todo Паттерн комманда. Запускает выполнение приложения.
         receiver.notifyObservers(jsonString);
         return (T) tClass.cast(new MapperFacadeProxy(new MapperFacade()).parseToObject(jsonString, tClass));
     }

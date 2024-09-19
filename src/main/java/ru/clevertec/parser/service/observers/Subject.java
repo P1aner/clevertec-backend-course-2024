@@ -10,7 +10,7 @@ public class Subject {
         observers.add(observer);
     }
 
-    //todo паттерн слушатель
+    //todo Паттерн слушатель. Наблюдает за изменениями класса и текстом, при котором приложение выполняется. Выводит этот текст в консоль или файл (не реализовывал, стоит заглушка).
     public void notifyObservers(String message) {
         for (Observer observer : observers) {
             observer.update(message);

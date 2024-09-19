@@ -9,7 +9,7 @@ import java.util.Map;
 public class MapperFacade implements JsonToObject {
     private final JsonToMap jsonToMap;
 
-    public MapperFacade() {//todo паттерн фасад
+    public MapperFacade() {//todo Паттерн фасад. Дает простой и понятный доступ к функциональности программы.
         this.jsonToMap = new JsonValue();
     }
 

@@ -25,7 +25,7 @@ public class MapToObjectParser {
         FIELD_INJECTOR_LIST.add(new ArrayFieldInjector());
     }
 
-    //todo паттерн стратегия
+    //todo Паттерн стратегия. Решает проблему читаемости и расширяемости кода. Новые инжекторы дописываются как класс, а не часть метода.
     @SneakyThrows
     public static <T> T parseMapToObject(Map<String, Object> stringObjectMap, Class<T> tClass) {
         T instance = tClass.getDeclaredConstructor().newInstance();

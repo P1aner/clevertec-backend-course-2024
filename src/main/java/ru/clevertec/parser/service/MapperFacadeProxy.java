@@ -15,7 +15,7 @@ public class MapperFacadeProxy implements JsonToObject {
 
     private final JsonToObject jsonToObject;
 
-    //todo паттерн прокси
+    //todo Паттерн прокси. Добавляет новый функционал по логированию выполнения методов. Решает проблему лишней ответственности для базового метода.
     @Override
     public <T> T parseToObject(String jsonString, Class<T> tClass) {
         AtomicReference<T> t = new AtomicReference<>();
