@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ru.clevertec.parser.annotation.Log;
 import ru.clevertec.parser.service.api.JsonToObject;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,16 +22,17 @@ public class MapperFacadeProxy implements JsonToObject {
         Arrays.stream(jsonToObject.getClass().getMethods())
                 .filter(s -> s.getName().equals(PARSE_TO_OBJECT_METHOD_NAME))
                 .findFirst()
-                .ifPresent(method -> {
-                            if (method.isAnnotationPresent(Log.class)) {
-                                System.out.printf("%s%s.%s\n", STARTING_METHOD, jsonToObject.getClass().getName(), method.getName());
-                                t.set(jsonToObject.parseToObject(jsonString, tClass));
-                                System.out.printf("%s%s.%s\n", FINISHED_METHOD, jsonToObject.getClass().getName(), method.getName());
-                            } else {
-                                t.set(jsonToObject.parseToObject(jsonString, tClass));
-                            }
-                        }
-                );
+                .ifPresent(method -> execMethod(jsonString, tClass, method, t));
         return t.get();
+    }
+
+    private <T> void execMethod(String jsonString, Class<T> tClass, Method method, AtomicReference<T> t) {
+        if (method.isAnnotationPresent(Log.class)) {
+            System.out.printf("%s%s.%s\n", STARTING_METHOD, jsonToObject.getClass().getName(), method.getName());
+            t.set(jsonToObject.parseToObject(jsonString, tClass));
+            System.out.printf("%s%s.%s\n", FINISHED_METHOD, jsonToObject.getClass().getName(), method.getName());
+        } else {
+            t.set(jsonToObject.parseToObject(jsonString, tClass));
+        }
     }
 }

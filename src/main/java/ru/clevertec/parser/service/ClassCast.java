@@ -3,13 +3,11 @@ package ru.clevertec.parser.service;
 import lombok.SneakyThrows;
 import ru.clevertec.parser.exception.ClassForParseNotFoundException;
 
-import javax.print.attribute.UnmodifiableSetException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 public class ClassCast {
@@ -39,21 +37,16 @@ public class ClassCast {
     }
 
     public static Class<?> convertPrimitiveToWrapperClass(Type genericType) {
-        Class<?> wrapperClass = PRIMITIVE_TO_WRAPPER_MAP.get(genericType);
-        if (wrapperClass != null) {
-            return wrapperClass;
-        } else {
-            throw new ClassForParseNotFoundException("primitive not found");
-        }
+        return Optional.ofNullable(PRIMITIVE_TO_WRAPPER_MAP.get(genericType))
+                .orElseThrow(() -> new ClassForParseNotFoundException("primitive not found"));
     }
 
     @SneakyThrows
     public static <T> T castTo(Class<T> tClass, Object valueForField) {
-        Function<String, ?> caster = CAST_FUNCTION_MAP.get(tClass);
-        if (caster != null) {
-            return tClass.cast(caster.apply((String) valueForField));
-        } else {
-            return tClass.cast(MapToObjectParser.parseMapToObject((Map<String, Object>) valueForField, tClass));
-        }
+        AtomicReference<T> t = new AtomicReference<>();
+        Optional.ofNullable(CAST_FUNCTION_MAP.get(tClass))
+                .ifPresentOrElse(caster -> t.set(tClass.cast(caster.apply((String) valueForField))),
+                        () -> t.set(tClass.cast(MapToObjectParser.parseMapToObject((Map<String, Object>) valueForField, tClass))));
+        return t.get();
     }
 }
