@@ -7,7 +7,6 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 public class ClassCast {
@@ -43,10 +42,8 @@ public class ClassCast {
 
     @SneakyThrows
     public static <T> T castTo(Class<T> tClass, Object valueForField) {
-        AtomicReference<T> t = new AtomicReference<>();
-        Optional.ofNullable(CAST_FUNCTION_MAP.get(tClass))
-                .ifPresentOrElse(caster -> t.set(tClass.cast(caster.apply((String) valueForField))),
-                        () -> t.set(tClass.cast(MapToObjectParser.parseMapToObject((Map<String, Object>) valueForField, tClass))));
-        return t.get();
+        return Optional.ofNullable(CAST_FUNCTION_MAP.get(tClass))
+                .map(caster -> tClass.cast(caster.apply((String) valueForField)))
+                .orElseGet(() -> tClass.cast(MapToObjectParser.parseMapToObject((Map<String, Object>) valueForField, tClass)));
     }
 }
