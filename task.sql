@@ -51,20 +51,34 @@ JOIN
 		FROM airports_data
 		WHERE city = '{  "en": "Yekaterinburg",  "ru": "Екатеринбург"}') AS ct ON flights.departure_airport = ct.airport_code
 WHERE flights.status != 'Arrived'
-ORDER BY flights.scheduled_departure
-LIMIT 1
+	AND flights.scheduled_departure =
+		(SELECT MIN(flights.scheduled_departure)
+			FROM flights
+			JOIN
+				(SELECT airports_data.airport_code
+					FROM airports_data
+					WHERE CITY = '{  "en": "Moscow",  "ru": "Москва"}') AS mt ON flights.arrival_airport = mt.airport_code
+			JOIN
+				(SELECT airports_data.airport_code
+					FROM airports_data
+					WHERE city = '{  "en": "Yekaterinburg",  "ru": "Екатеринбург"}') AS ct ON flights.departure_airport = ct.airport_code
+		WHERE flights.status != 'Arrived')
 
 -- Вывести самый дешевый и дорогой билет и стоимость ( в одном результирующем ответе)
 SELECT *
 FROM (
 							(SELECT *
 								FROM ticket_flights
-								ORDER BY amount ASC
+								WHERE amount =
+										(SELECT MAX(amount)
+											FROM ticket_flights)
 								LIMIT 1)
 						UNION
 							(SELECT *
 								FROM ticket_flights
-								ORDER BY amount DESC
+								WHERE amount =
+										(SELECT MIN(amount)
+											FROM ticket_flights)
 								LIMIT 1)) un
 JOIN ticket_flights ON un.ticket_no = ticket_flights.ticket_no
 AND un.flight_id = ticket_flights.flight_id
@@ -108,9 +122,9 @@ WITH t1 AS
 			adt.city,
 			ad.model,
 			f.arrival_airport,
-			COUNT(F.arrival_airport) count_arr_ap
+			COUNT(f.arrival_airport) count_arr_ap
 		FROM aircrafts_data ad
-		JOIN flights f ON AD.aircraft_code = f.aircraft_code
+		JOIN flights f ON ad.aircraft_code = f.aircraft_code
 		JOIN airports_data adt ON adt.airport_code = f.arrival_airport
 		GROUP BY ad.aircraft_code,
 			f.arrival_airport,
