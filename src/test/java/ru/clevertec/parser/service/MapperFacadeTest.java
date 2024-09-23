@@ -30,8 +30,8 @@ class MapperFacadeTest {
         Assertions.assertEquals(4.0, root.getDoubleOId());
         Assertions.assertEquals("user_id_value", root.getUseridString());
         Assertions.assertEquals(1, root.getIntArr()[0]);
-        Assertions.assertEquals("2", root.getUsers().get(0).getId());
-        Assertions.assertEquals(1, root.getUsers().get(0).getProp().get(0).getPr());
+        Assertions.assertEquals("2", root.getUsers().getFirst().getId());
+        Assertions.assertEquals(1, root.getUsers().getFirst().getProp().getFirst().getPr());
         Assertions.assertEquals("2", root.getMap().get("1"));
     }
 

@@ -19,15 +19,13 @@ class JsonValueTest {
         Assertions.assertEquals("e", map.get("ch"));
         Assertions.assertEquals("false", map.get("bool"));
         Assertions.assertEquals("4.0", map.get("floatOId"));
-        Assertions.assertEquals("1", ((List) map.get("intArr")).get(0));
-        Assertions.assertEquals("2", ((Map) ((List) map.get("users")).get(0)).get("id"));
+        Assertions.assertEquals("1", ((List<?>) map.get("intArr")).getFirst());
+        Assertions.assertEquals("2", ((Map<?, ?>) ((List<?>) map.get("users")).getFirst()).get("id"));
     }
 
     @Test
     void parseToMapWithIncorrect() {
         JsonToMap jsonToMap = new JsonValue();
-        Assertions.assertThrows(IncorrectJsonStringException.class, () -> {
-            jsonToMap.parseToMap(JsonStringData.INCORRECT_JSON);
-        });
+        Assertions.assertThrows(IncorrectJsonStringException.class, () -> jsonToMap.parseToMap(JsonStringData.INCORRECT_JSON));
     }
 }

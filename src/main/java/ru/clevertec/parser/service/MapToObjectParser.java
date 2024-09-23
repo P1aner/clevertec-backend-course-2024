@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class MapToObjectParser {
 
@@ -30,25 +31,29 @@ public class MapToObjectParser {
     public static <T> T parseMapToObject(Map<String, Object> stringObjectMap, Class<T> tClass) {
         T instance = tClass.getDeclaredConstructor().newInstance();
         Field[] fields = tClass.getDeclaredFields();
-        Arrays.stream(fields).forEach(field -> {
-            Class<?> fieldType = field.getType();
-            String fieldName = field.getName();
-            JsonField annotation = field.getAnnotation(JsonField.class);
-            if (annotation != null && !annotation.name().isEmpty()) {
-                fieldName = annotation.name();
-            }
-            Object valueOfMap = stringObjectMap.get(fieldName);
-            if (valueOfMap != null) {
-                field.setAccessible(true);
-                FIELD_INJECTOR_LIST.stream()
-                        .filter(s -> s.isSupportedType(fieldType))
-                        .findFirst()
-                        .ifPresentOrElse(s -> s.injectField(instance, field, valueOfMap),
-                                recursiveParsing(field, instance, valueOfMap));
-                field.setAccessible(false);
-            }
-        });
+        Arrays.stream(fields).forEach(field -> fillField(stringObjectMap, field, instance));
         return instance;
+    }
+
+    private static <T> void fillField(Map<String, Object> stringObjectMap, Field field, T instance) {
+        Class<?> fieldType = field.getType();
+        String fieldName = field.getName();
+        JsonField annotation = field.getAnnotation(JsonField.class);
+        if (annotation != null && !annotation.name().isEmpty()) {
+            fieldName = annotation.name();
+        }
+        Optional.ofNullable(stringObjectMap.get(fieldName))
+                .ifPresent(valueOfMap -> fieldInjector(field, instance, valueOfMap, fieldType));
+    }
+
+    private static <T> void fieldInjector(Field field, T instance, Object valueOfMap, Class<?> fieldType) {
+        field.setAccessible(true);
+        FIELD_INJECTOR_LIST.stream()
+                .filter(s -> s.isSupportedType(fieldType))
+                .findFirst()
+                .ifPresentOrElse(s -> s.injectField(instance, field, valueOfMap),
+                        recursiveParsing(field, instance, valueOfMap));
+        field.setAccessible(false);
     }
 
     private static <T> Runnable recursiveParsing(Field field, T instance, Object valueOfMap) {

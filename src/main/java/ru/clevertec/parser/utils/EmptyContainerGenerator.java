@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.SortedMap;
@@ -67,12 +68,9 @@ public class EmptyContainerGenerator {
     @SneakyThrows
     public static Collection<?> generateCollection(Class<?> clazz) {
         if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
-            Supplier<Collection<?>> supplier = SUPPLIER_EMPTY_COLLECTION.get(clazz);
-            if (supplier != null) {
-                return supplier.get();
-            } else {
-                throw new ImplementationNotFoundException("Collection not found");
-            }
+            return Optional.ofNullable(SUPPLIER_EMPTY_COLLECTION.get(clazz))
+                    .orElseThrow(() -> new ImplementationNotFoundException("Collection not found"))
+                    .get();
         } else {
             return (Collection<?>) clazz.getDeclaredConstructor().newInstance();
         }
@@ -80,14 +78,10 @@ public class EmptyContainerGenerator {
 
     @SneakyThrows
     public static Map<?, ?> generateMap(Class<?> clazz) {
-
         if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
-            Supplier<Map<?, ?>> supplier = SUPPLIER_EMPTY_MAP.get(clazz);
-            if (supplier != null) {
-                return supplier.get();
-            } else {
-                throw new ImplementationNotFoundException("Map not found");
-            }
+            return Optional.ofNullable(SUPPLIER_EMPTY_MAP.get(clazz))
+                    .orElseThrow(() -> new ImplementationNotFoundException("Map not found"))
+                    .get();
         } else {
             return (Map<?, ?>) clazz.getDeclaredConstructor().newInstance();
         }
