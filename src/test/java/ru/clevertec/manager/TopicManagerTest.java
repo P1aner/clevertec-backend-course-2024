@@ -16,7 +16,7 @@ class TopicManagerTest {
     @SneakyThrows
     @RepeatedTest(100)
     void ManagerTest() {
-        TopicManager topicManager = TopicManager.INSTANCE;
+        TopicManager topicManager = TopicManager.getInstance();
         List<Thread> threads = new ArrayList<>();
         List<Consumer> consumers = new ArrayList<>();
         List<CountDownLatch> latches = new ArrayList<>();

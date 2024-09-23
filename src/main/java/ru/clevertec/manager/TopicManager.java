@@ -4,24 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public enum TopicManager implements Manager {
-
-    INSTANCE {
-        @Override
-        public Topic createTopic(String name, int maxConsumers) {
-            return super.createTopic(name, maxConsumers);
-        }
-
-        @Override
-        public Optional<Topic> getTopic(String name) {
-            return super.getTopic(name);
-        }
-    };
-
+public class TopicManager implements Manager {
+    private static volatile TopicManager instance;
     private final Map<String, Topic> topics;
 
-    TopicManager() {
-        topics = new HashMap<>();
+    private TopicManager(Map<String, Topic> topics) {
+        this.topics = topics;
+    }
+
+    public static TopicManager getInstance() {
+        TopicManager localInstance = instance;
+        if (localInstance == null) {
+            synchronized (TopicManager.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new TopicManager(new HashMap<>());
+                }
+            }
+        }
+        return localInstance;
     }
 
     public Topic createTopic(String name, int maxConsumers) {
