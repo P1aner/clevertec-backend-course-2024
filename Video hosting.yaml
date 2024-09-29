@@ -1,0 +1,342 @@
+openapi: 3.1.0
+info:
+  title: Video hosting
+  description: This is a sample of REST
+  version: 0.0.1
+servers:
+  - url: https://localhost:8080/api/v0.0.1
+tags:
+  - name: user
+    description: Operations about user
+  - name: channel
+    description: Operations about channel
+  - name: subscription
+    description: Operations about subscription
+paths:
+  /users:
+    post:
+      tags:
+        - user
+      description: Create user.
+      operationId: createUser
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+
+  /users/{username}:
+    get:
+      tags:
+        - user
+      description: Get user by username
+      operationId: getUserByUsername
+      parameters:
+        - name: username
+          in: path
+          description: 'The name that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+    put:
+      tags:
+        - user
+      description: Updated user information.
+      operationId: updateUser
+      parameters:
+        - name: username
+          in: path
+          description: Name of user, that need to be updated
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Update an existent user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+
+  /users/{username}/channels:
+    get:
+      tags:
+        - user
+      description: Get list of user subscriptions (without pagination, only channelName)
+      operationId: getUsersSubscriptions
+      parameters:
+        - name: username
+          in: path
+          description: 'The name that needs to be fetched'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  $ref: '#/components/schemas/Channel/properties/name'
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+
+  /channels:
+    post:
+      tags:
+        - channel
+      description: Create channel.
+      operationId: createChannel
+      requestBody:
+        description: Created channel object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Channel'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Channel'
+    get:
+      tags:
+        - channel
+      description: Get list of channels with pagination, filter of name, language, cathegory.
+      operationId: getChannels
+      parameters:
+        - name: page
+          in: query
+          description: Number of displayed page
+          required: false
+          schema:
+            type: integer
+        - name: nameFilter
+          in: query
+          description: Filter of name
+          required: false
+          schema:
+            type: string
+        - name: languageFilter
+          in: query
+          description: Filter of language
+          required: false
+          schema:
+            type: string
+        - name: cathegoryFilter
+          in: query
+          description: Filter of cathegory
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                 type: array
+                 items: 
+                  type: object
+                  $ref: '#/components/schemas/Channel'
+
+
+  /channels/{name}:
+    get:
+      tags:
+        - channel
+      summary: Get channel by name
+      description: Get channel information
+      operationId: getChannel
+      parameters:
+        - name: name
+          in: path
+          description: 'The name that needs to be fetched'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Channel'
+        '400':
+          description: Invalid channelName supplied
+        '404':
+          description: Channel not found
+    put:
+      tags:
+        - channel
+      description: Update channel
+      operationId: updateChannel
+      parameters:
+        - name: name
+          in: path
+          description: Name of Channel that need to be updated
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Update an existent channel
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Channel'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid channelName supplied
+        '404':
+          description: Channel not found
+
+  /subscriptions:
+    post:
+      tags:
+        - subscription
+      description: Сreate a user subscription to the channel
+      operationId: createSubscription
+      parameters:
+        - name: username
+          in: query
+          description: username that need to be create a subscrib
+          required: true
+          schema:
+            type: string
+        - name: channelName
+          in: query
+          description: channel to create a subscrib
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          description: Invalid channelName or userName supplied
+        '404':
+          description: Channel or user not found
+    delete:
+      tags:
+        - subscription
+      description: Remove a user subscription to the channel
+      operationId: removeSubscription
+      parameters:
+        - name: username
+          in: query
+          description: username that need to be remove a subscrib
+          required: true
+          schema:
+            type: string
+        - name: channelName
+          in: query
+          description: channel to remove a subscrib
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: successful operation
+        '400':
+          description: Invalid channelName or userName supplied
+        '404':
+          description: Channel or user not found
+
+components:
+  schemas:
+    User:
+      type: object
+      description: User
+      properties:
+        nickName:
+          type: string
+          description: User's nickName
+          examples: [Nick]
+        username:
+          type: string
+          description: User's name
+          examples: [Name]
+        email:
+          type: string
+          description: User's mail 
+          examples: [user@exampleMail.com]
+        subscribes:
+          type: array
+          description: User's subscribers list
+          items:
+            type: object
+            $ref: '#/components/schemas/Channel'
+    Channel:
+      type: object
+      description: Channel
+      properties:
+        name:
+          type: string
+          description: Channel's name
+          examples: [ChannelName]
+        descrioption:
+          type: string
+          description: Descrioption of channel
+          examples: [Channel about animals]
+        author:
+          type: object
+          description: Author of channel (User)
+          item:
+           $ref: '#/components/schemas/User'
+        subscribers:
+          type: array
+          description: List of subscribers (Users)
+          items:
+            type: object
+            $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+          description: CreatedAt
+          examples: [12.12.2024]
+        language:
+          type: string
+          description: Main language
+          examples: [english]
+        avatar:
+          type: string
+          description: Url to the picture
+          examples: [url.png]
+        cathegory:
+          type: string
+          description:  Cathegory
+          examples: [Cats]
