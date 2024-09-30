@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Video hosting
-  description: This is a sample of REST
+  description: This is a sample of Video hosting REST API
   version: 0.0.1
 servers:
   - url: https://localhost:8080/api/v0.0.1
@@ -17,7 +17,8 @@ paths:
     post:
       tags:
         - user
-      description: Create user.
+      summary: Create user.
+      description: This POST method takes a json as input and creates an object in the database.
       operationId: createUser
       requestBody:
         description: Created user object
@@ -27,7 +28,7 @@ paths:
               $ref: '#/components/schemas/User'
       responses:
         '201':
-          description: successful operation
+          description: Successful operation. Object created
           content:
             application/json:
               schema:
@@ -38,12 +39,14 @@ paths:
     get:
       tags:
         - user
-      description: Get user by username
+      summary: Show user.
+      description: Returns user object in JSON format by name
       operationId: getUserByUsername
       parameters:
         - name: username
           in: path
           description: 'The name that needs to be fetched.'
+          example: alex
           required: true
           schema:
             type: string
@@ -61,12 +64,15 @@ paths:
     put:
       tags:
         - user
-      description: Updated user information.
+      summary: Updated user information.
+      description:
+        Update user object in JSON format by name. userName will not be changed
       operationId: updateUser
       parameters:
         - name: username
           in: path
           description: Name of user, that need to be updated
+          example: alex
           required: true
           schema:
             type: string
@@ -88,12 +94,14 @@ paths:
     get:
       tags:
         - user
+      summary: User's subscriptions.
       description: Get list of user subscriptions (without pagination, only channelName)
       operationId: getUsersSubscriptions
       parameters:
         - name: username
           in: path
           description: 'The name that needs to be fetched'
+          example: alex
           required: true
           schema:
             type: string
@@ -105,7 +113,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
+                  type: string
                   $ref: '#/components/schemas/Channel/properties/name'
         '400':
           description: Invalid username supplied
@@ -116,7 +124,8 @@ paths:
     post:
       tags:
         - channel
-      description: Create channel.
+      summary: Create channel.
+      description: This POST method takes a json as input and creates an object in the database.
       operationId: createChannel
       requestBody:
         description: Created channel object
@@ -126,7 +135,7 @@ paths:
               $ref: '#/components/schemas/Channel'
       responses:
         '201':
-          description: successful operation
+          description: Successful operation. Object created
           content:
             application/json:
               schema:
@@ -134,30 +143,35 @@ paths:
     get:
       tags:
         - channel
+      summary: Show list of channels.
       description: Get list of channels with pagination, filter of name, language, cathegory.
       operationId: getChannels
       parameters:
         - name: page
           in: query
           description: Number of displayed page
+          example: 1
           required: false
           schema:
             type: integer
         - name: nameFilter
           in: query
           description: Filter of name
+          example: ChannelName
           required: false
           schema:
             type: string
         - name: languageFilter
           in: query
           description: Filter of language
+          example: English
           required: false
           schema:
             type: string
         - name: cathegoryFilter
           in: query
           description: Filter of cathegory
+          example: Cats
           required: false
           schema:
             type: string
@@ -167,10 +181,10 @@ paths:
           content:
             application/json:
               schema:
-                 type: array
-                 items: 
+                type: array
+                items:
                   type: object
-                  $ref: '#/components/schemas/Channel'
+                  $ref: '#/components/schemas/FilteredChannel'
 
 
   /channels/{name}:
@@ -178,12 +192,13 @@ paths:
       tags:
         - channel
       summary: Get channel by name
-      description: Get channel information
+      description: Get channel information by channel name
       operationId: getChannel
       parameters:
         - name: name
           in: path
           description: 'The name that needs to be fetched'
+          example: channelName
           required: true
           schema:
             type: string
@@ -201,7 +216,9 @@ paths:
     put:
       tags:
         - channel
-      description: Update channel
+      summary: Update channel
+      description:
+        Update channel by channel name. ChannelName will not be changed
       operationId: updateChannel
       parameters:
         - name: name
@@ -228,12 +245,14 @@ paths:
     post:
       tags:
         - subscription
+      summary: Create subscribe
       description: Сreate a user subscription to the channel
       operationId: createSubscription
       parameters:
         - name: username
           in: query
           description: username that need to be create a subscrib
+          example: username
           required: true
           schema:
             type: string
@@ -241,6 +260,7 @@ paths:
           in: query
           description: channel to create a subscrib
           required: true
+          example: channelName
           schema:
             type: string
       responses:
@@ -253,18 +273,21 @@ paths:
     delete:
       tags:
         - subscription
+      summary: Unsubscribe user
       description: Remove a user subscription to the channel
       operationId: removeSubscription
       parameters:
         - name: username
           in: query
           description: username that need to be remove a subscrib
+          example: username
           required: true
           schema:
             type: string
         - name: channelName
           in: query
           description: channel to remove a subscrib
+          example: channelName
           required: true
           schema:
             type: string
@@ -292,7 +315,7 @@ components:
           examples: [Name]
         email:
           type: string
-          description: User's mail 
+          description: User's mail
           examples: [user@exampleMail.com]
         subscribes:
           type: array
@@ -316,7 +339,7 @@ components:
           type: object
           description: Author of channel (User)
           item:
-           $ref: '#/components/schemas/User'
+            $ref: '#/components/schemas/User'
         subscribers:
           type: array
           description: List of subscribers (Users)
@@ -328,6 +351,31 @@ components:
           format: date-time
           description: CreatedAt
           examples: [12.12.2024]
+        language:
+          type: string
+          description: Main language
+          examples: [english]
+        avatar:
+          type: string
+          description: Url to the picture
+          examples: [url.png]
+        cathegory:
+          type: string
+          description:  Cathegory
+          examples: [Cats]
+    FilteredChannel:
+      type: object
+      description: Channel to display in the list
+      properties:
+        name:
+          type: string
+          description: Channel's name
+          examples: [ChannelName]
+        subscribersNumber:
+          type: integer
+          format: int64
+          description:  Number of subscribers
+          examples: [110000]
         language:
           type: string
           description: Main language
