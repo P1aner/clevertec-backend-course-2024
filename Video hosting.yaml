@@ -7,11 +7,11 @@ servers:
   - url: https://localhost:8080/api/v0.0.1
 tags:
   - name: user
-    description: Operations about user
+    description: User operations
   - name: channel
-    description: Operations about channel
-  - name: subscription
-    description: Operations about subscription
+    description: Channel operations
+  - name: subscribtion
+    description: Subscribtion operations
 paths:
   /users:
     post:
@@ -113,7 +113,6 @@ paths:
               schema:
                 type: array
                 items:
-                  type: string
                   $ref: '#/components/schemas/Channel/properties/name'
         '400':
           description: Invalid username supplied
@@ -183,7 +182,6 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
                   $ref: '#/components/schemas/FilteredChannel'
 
 
@@ -244,7 +242,7 @@ paths:
   /subscriptions:
     post:
       tags:
-        - subscription
+        - subscribtion
       summary: Create subscribe
       description: Сreate a user subscription to the channel
       operationId: createSubscription
@@ -272,7 +270,7 @@ paths:
           description: Channel or user not found
     delete:
       tags:
-        - subscription
+        - subscribtion
       summary: Unsubscribe user
       description: Remove a user subscription to the channel
       operationId: removeSubscription
@@ -321,7 +319,6 @@ components:
           type: array
           description: User's subscribers list
           items:
-            type: object
             $ref: '#/components/schemas/Channel'
     Channel:
       type: object
@@ -336,15 +333,12 @@ components:
           description: Descrioption of channel
           examples: [Channel about animals]
         author:
-          type: object
           description: Author of channel (User)
-          item:
-            $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/User'
         subscribers:
           type: array
           description: List of subscribers (Users)
           items:
-            type: object
             $ref: '#/components/schemas/User'
         createdAt:
           type: string
