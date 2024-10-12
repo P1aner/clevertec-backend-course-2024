@@ -36,6 +36,11 @@ dependencies {
 	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	implementation("org.mapstruct:mapstruct:1.6.2")
+	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.2")
+	implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+
 }
 
 tasks.withType<Test> {
