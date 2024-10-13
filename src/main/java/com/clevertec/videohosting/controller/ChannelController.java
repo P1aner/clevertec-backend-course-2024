@@ -2,9 +2,10 @@ package com.clevertec.videohosting.controller;
 
 import com.clevertec.videohosting.dto.ChannelDto;
 import com.clevertec.videohosting.dto.CreateChannelDto;
+import com.clevertec.videohosting.dto.CreatedChannelDto;
 import com.clevertec.videohosting.dto.FilteredChannelDto;
 import com.clevertec.videohosting.dto.UpdatedChannelDto;
-import com.clevertec.videohosting.model.enums.Category;
+import com.clevertec.videohosting.model.Category;
 import com.clevertec.videohosting.model.enums.Language;
 import com.clevertec.videohosting.service.ChannelService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class ChannelController {
     private final ChannelService channelService;
 
     @PostMapping
-    public ResponseEntity<UpdatedChannelDto> createChannel(@RequestBody CreateChannelDto createChannelDTO) {
+    public ResponseEntity<CreatedChannelDto> createChannel(@RequestBody CreateChannelDto createChannelDTO) {
         return ResponseEntity.ok(channelService.createChannel(createChannelDTO));
     }
 
@@ -49,14 +50,8 @@ public class ChannelController {
                                                                    @RequestParam(required = false) String channelCategory,
                                                                    Pageable pageable) {
         Language language = null;
-        if (channelLanguage != null){
-            language = Language.valueOf(channelLanguage);
-        }
-        Category category = null;
-        if (channelCategory != null){
-            category = Category.valueOf(channelCategory);
-        }
-        List<FilteredChannelDto> filteredChannels = channelService.getFilteredChannels(channelName, language, category, pageable);
+        if (channelLanguage != null) language = Language.valueOf(channelLanguage);
+        List<FilteredChannelDto> filteredChannels = channelService.getFilteredChannels(channelName, language, channelCategory, pageable);
         return ResponseEntity.ok(filteredChannels);
     }
 }

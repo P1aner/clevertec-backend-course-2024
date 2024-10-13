@@ -1,6 +1,6 @@
 package com.clevertec.videohosting.model;
 
-import com.clevertec.videohosting.model.enums.Category;
+
 import com.clevertec.videohosting.model.enums.Language;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,5 +41,7 @@ public class Channel {
     private LocalDateTime createdAt;
     private Language mainLanguage;
     private String base64Image;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
 }

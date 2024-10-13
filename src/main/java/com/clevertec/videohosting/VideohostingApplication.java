@@ -5,9 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class VideohostingApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(VideohostingApplication.class, args);
     }
-
 }

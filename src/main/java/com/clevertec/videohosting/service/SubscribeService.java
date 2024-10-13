@@ -1,6 +1,7 @@
 package com.clevertec.videohosting.service;
 
 import com.clevertec.videohosting.exception.ResourceNotFoundException;
+import com.clevertec.videohosting.exception.SubscribeException;
 import com.clevertec.videohosting.model.AppUser;
 import com.clevertec.videohosting.model.Channel;
 import com.clevertec.videohosting.repository.AppUserRepository;
@@ -14,21 +15,21 @@ public class SubscribeService {
     private final ChannelRepository channelRepository;
     private final AppUserRepository appUserRepository;
 
-    public void subscribeUser(Long channelId, Long userId) {
-        Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new ResourceNotFoundException("Канал не найден"));
-        AppUser user = appUserRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
-        if (channel.getSubscribers().contains(user))
-            throw new ResourceNotFoundException("Пользователь не подписан"); //todo
-        channel.getSubscribers().add(user);
+    public void subscribeUser(Long channelId, Long appUserId) {
+        Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new ResourceNotFoundException("Channel not found"));
+        AppUser appUser = appUserRepository.findById(appUserId).orElseThrow(() -> new ResourceNotFoundException("AppUser not found"));
+        if (channel.getSubscribers().contains(appUser))
+            throw new SubscribeException("AppUser is already subscribe");
+        channel.getSubscribers().add(appUser);
         channelRepository.save(channel);
     }
 
-    public void unsubscribeUser(Long channelId, Long userId) {
-        Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new ResourceNotFoundException("Канал не найден"));
-        AppUser user = appUserRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
-        boolean remove = channel.getSubscribers().remove(user);
-        if (!remove)
-            throw new ResourceNotFoundException("Пользователь не подписан"); //todo
+    public void unsubscribeUser(Long channelId, Long appUserId) {
+        Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new ResourceNotFoundException("Channel not found"));
+        AppUser appUser = appUserRepository.findById(appUserId).orElseThrow(() -> new ResourceNotFoundException("AppUser not found"));
+        boolean removeOperation = channel.getSubscribers().remove(appUser);
+        if (!removeOperation)
+            throw new SubscribeException("AppUser is already unsubscribe");
         channelRepository.save(channel);
     }
 }

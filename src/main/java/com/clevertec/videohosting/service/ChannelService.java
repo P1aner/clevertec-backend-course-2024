@@ -2,13 +2,15 @@ package com.clevertec.videohosting.service;
 
 import com.clevertec.videohosting.dto.ChannelDto;
 import com.clevertec.videohosting.dto.CreateChannelDto;
+import com.clevertec.videohosting.dto.CreatedChannelDto;
 import com.clevertec.videohosting.dto.FilteredChannelDto;
 import com.clevertec.videohosting.dto.UpdatedChannelDto;
 import com.clevertec.videohosting.dto.mapper.ChannelMapper;
 import com.clevertec.videohosting.exception.ResourceNotFoundException;
 import com.clevertec.videohosting.model.Channel;
-import com.clevertec.videohosting.model.enums.Category;
+import com.clevertec.videohosting.model.Category;
 import com.clevertec.videohosting.model.enums.Language;
+import com.clevertec.videohosting.repository.CategoryRepository;
 import com.clevertec.videohosting.repository.ChannelRepository;
 import com.clevertec.videohosting.repository.ChannelSpecification;
 import lombok.RequiredArgsConstructor;
@@ -23,26 +25,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChannelService {
     private final ChannelRepository channelRepository;
+    private final CategoryRepository categoryRepository;
     private final ChannelMapper channelMapper;
 
-    public UpdatedChannelDto createChannel(CreateChannelDto createChannelDto) {
+    public CreatedChannelDto createChannel(CreateChannelDto createChannelDto) {
         Channel channel = channelMapper.toChannel(createChannelDto);
         Channel save = channelRepository.save(channel);
-        return channelMapper.toUpdatedChannelDto(save);
+        return channelMapper.toCreatedChannelDto(save);
     }
 
     public UpdatedChannelDto updateChannel(Long id, UpdatedChannelDto updatedChannelDto) {
-        Channel updatedChannel = channelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Канал не найден"));
+        Channel updatedChannel = channelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Channel not found"));
         channelMapper.updateChannelFromDto(updatedChannelDto, updatedChannel);
         Channel save = channelRepository.save(updatedChannel);
         return channelMapper.toUpdatedChannelDto(save);
     }
 
-
-    public List<FilteredChannelDto> getFilteredChannels(String channelName, Language language, Category category, Pageable pageable) {
+    public List<FilteredChannelDto> getFilteredChannels(String channelName, Language language, String categoryName, Pageable pageable) {
+        Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         Specification<Channel> spec = ChannelSpecification.filterBy(channelName, language, category);
-        Page<Channel> all = channelRepository.findAll(spec, pageable);
-        return channelMapper.toFilteredhannelDtoList(all.getContent());
+        Page<Channel> channelPage = channelRepository.findAll(spec, pageable);
+        return channelMapper.toFilteredhannelDtoList(channelPage.getContent());
     }
 
     public ChannelDto getChannelDetails(Long id) {

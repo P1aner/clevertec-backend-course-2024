@@ -21,7 +21,7 @@ public class AppUserService {
     private final ChannelMapper channelMapper;
 
     public List<ChannelNameDto> getAllUserSubscriptions(Long userId) {
-        AppUser user = appUserRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
+        AppUser user = appUserRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("AppUser not found"));
         return channelMapper.toChannelNameDtoList(user.getSubscriptions());
     }
 
@@ -32,7 +32,7 @@ public class AppUserService {
     }
 
     public UpdatedAppUserDto updateAppUser(Long id, UpdatedAppUserDto updatedAppUserDto) {
-        AppUser appUser = appUserRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Канал не найден"));//todo
+        AppUser appUser = appUserRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("AppUser not found"));
         appUserMapper.updateAppUserFromDto(updatedAppUserDto, appUser);
         return appUserMapper.toUpdatedAppUserDto(appUser);
     }

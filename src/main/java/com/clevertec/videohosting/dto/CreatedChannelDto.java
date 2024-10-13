@@ -10,10 +10,12 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdatedChannelDto {
+public class CreatedChannelDto {
+    private Long id;
     private String name;
     private String description;
     private LocalDateTime createdAt;
+    private Long authorId;
     private Language mainLanguage;
     private String base64Image;
     private String categoryName;

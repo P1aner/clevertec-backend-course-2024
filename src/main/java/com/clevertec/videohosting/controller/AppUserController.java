@@ -33,8 +33,8 @@ public class AppUserController {
         return ResponseEntity.ok(appUserService.updateAppUser(id, updatedAppUserDto));
     }
 
-    @GetMapping("/{appUserId}/subscriptions")
-    public ResponseEntity<List<ChannelNameDto>> getAllAppUserSubscriptions(@PathVariable Long appUserId) {
-        return ResponseEntity.ok(appUserService.getAllUserSubscriptions(appUserId));
+    @GetMapping("/{userId}/subscriptions")
+    public ResponseEntity<List<ChannelNameDto>> getAllAppUserSubscriptions(@PathVariable Long userId) {
+        return ResponseEntity.ok(appUserService.getAllUserSubscriptions(userId));
     }
 }

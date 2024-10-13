@@ -1,6 +1,5 @@
 package com.clevertec.videohosting.dto;
 
-import com.clevertec.videohosting.model.enums.Category;
 import com.clevertec.videohosting.model.enums.Language;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,5 +13,5 @@ public class FilteredChannelDto {
     private Long subscriberCount;
     private Language mainLanguage;
     private String base64Image;
-    private Category category;
+    private String categoryName;
 }
