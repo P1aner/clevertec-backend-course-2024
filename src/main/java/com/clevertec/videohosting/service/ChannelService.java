@@ -7,8 +7,8 @@ import com.clevertec.videohosting.dto.FilteredChannelDto;
 import com.clevertec.videohosting.dto.UpdatedChannelDto;
 import com.clevertec.videohosting.dto.mapper.ChannelMapper;
 import com.clevertec.videohosting.exception.ResourceNotFoundException;
-import com.clevertec.videohosting.model.Channel;
 import com.clevertec.videohosting.model.Category;
+import com.clevertec.videohosting.model.Channel;
 import com.clevertec.videohosting.model.enums.Language;
 import com.clevertec.videohosting.repository.CategoryRepository;
 import com.clevertec.videohosting.repository.ChannelRepository;
@@ -37,6 +37,10 @@ public class ChannelService {
     public UpdatedChannelDto updateChannel(Long id, UpdatedChannelDto updatedChannelDto) {
         Channel updatedChannel = channelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Channel not found"));
         channelMapper.updateChannelFromDto(updatedChannelDto, updatedChannel);
+        if (updatedChannelDto.getCategoryName() != null) {
+            Category category = categoryRepository.findByName(updatedChannelDto.getCategoryName()).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            updatedChannel.setCategory(category);
+        }
         Channel save = channelRepository.save(updatedChannel);
         return channelMapper.toUpdatedChannelDto(save);
     }

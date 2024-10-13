@@ -22,7 +22,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class AppUser {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 

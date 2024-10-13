@@ -27,7 +27,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class Channel {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
