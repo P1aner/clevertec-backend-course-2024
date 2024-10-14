@@ -1,383 +1,860 @@
-openapi: 3.0.0
-info:
-  title: Video hosting
-  description: This is a sample of Video hosting REST API
-  version: 0.0.1
-servers:
-  - url: https://localhost:8080/api/v0.0.1
-tags:
-  - name: user
-    description: User operations
-  - name: channel
-    description: Channel operations
-  - name: subscribtion
-    description: Subscribtion operations
-paths:
-  /users:
-    post:
-      tags:
-        - user
-      summary: Create user.
-      description: This POST method takes a json as input and creates an object in the database.
-      operationId: createUser
-      requestBody:
-        description: Created user object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-      responses:
-        '201':
-          description: Successful operation. Object created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-
-
-  /users/{username}:
-    get:
-      tags:
-        - user
-      summary: Show user.
-      description: Returns user object in JSON format by name
-      operationId: getUserByUsername
-      parameters:
-        - name: username
-          in: path
-          description: 'The name that needs to be fetched.'
-          example: alex
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: Invalid username supplied
-        '404':
-          description: User not found
-    put:
-      tags:
-        - user
-      summary: Updated user information.
-      description:
-        Update user object in JSON format by name. userName will not be changed
-      operationId: updateUser
-      parameters:
-        - name: username
-          in: path
-          description: Name of user, that need to be updated
-          example: alex
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: Update an existent user
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-      responses:
-        '200':
-          description: Successful operation
-        '400':
-          description: Invalid username supplied
-        '404':
-          description: User not found
-
-  /users/{username}/channels:
-    get:
-      tags:
-        - user
-      summary: User's subscriptions.
-      description: Get list of user subscriptions (without pagination, only channelName)
-      operationId: getUsersSubscriptions
-      parameters:
-        - name: username
-          in: path
-          description: 'The name that needs to be fetched'
-          example: alex
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Channel/properties/name'
-        '400':
-          description: Invalid username supplied
-        '404':
-          description: User not found
-
-  /channels:
-    post:
-      tags:
-        - channel
-      summary: Create channel.
-      description: This POST method takes a json as input and creates an object in the database.
-      operationId: createChannel
-      requestBody:
-        description: Created channel object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Channel'
-      responses:
-        '201':
-          description: Successful operation. Object created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Channel'
-    get:
-      tags:
-        - channel
-      summary: Show list of channels.
-      description: Get list of channels with pagination, filter of name, language, cathegory.
-      operationId: getChannels
-      parameters:
-        - name: page
-          in: query
-          description: Number of displayed page
-          example: '1'
-          required: false
-          schema:
-            type: integer
-        - name: nameFilter
-          in: query
-          description: Filter of name
-          example: ChannelName
-          required: false
-          schema:
-            type: string
-        - name: languageFilter
-          in: query
-          description: Filter of language
-          example: English
-          required: false
-          schema:
-            type: string
-        - name: cathegoryFilter
-          in: query
-          description: Filter of cathegory
-          example: Cats
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/FilteredChannel'
-
-
-  /channels/{name}:
-    get:
-      tags:
-        - channel
-      summary: Get channel by name
-      description: Get channel information by channel name
-      operationId: getChannel
-      parameters:
-        - name: name
-          in: path
-          description: 'The name that needs to be fetched'
-          example: channelName
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Channel'
-        '400':
-          description: Invalid channelName supplied
-        '404':
-          description: Channel not found
-    put:
-      tags:
-        - channel
-      summary: Update channel
-      description:
-        Update channel by channel name. ChannelName will not be changed
-      operationId: updateChannel
-      parameters:
-        - name: name
-          in: path
-          description: Name of Channel that need to be updated
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: Update an existent channel
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Channel'
-      responses:
-        '200':
-          description: successful operation
-        '400':
-          description: Invalid channelName supplied
-        '404':
-          description: Channel not found
-
-  /subscriptions:
-    post:
-      tags:
-        - subscribtion
-      summary: Create subscribe
-      description: Сreate a user subscription to the channel
-      operationId: createSubscription
-      parameters:
-        - name: username
-          in: query
-          description: username that need to be create a subscrib
-          example: username
-          required: true
-          schema:
-            type: string
-        - name: channelName
-          in: query
-          description: channel to create a subscrib
-          required: true
-          example: channelName
-          schema:
-            type: string
-      responses:
-        '201':
-          description: successful operation
-        '400':
-          description: Invalid channelName or userName supplied
-        '404':
-          description: Channel or user not found
-    delete:
-      tags:
-        - subscribtion
-      summary: Unsubscribe user
-      description: Remove a user subscription to the channel
-      operationId: removeSubscription
-      parameters:
-        - name: username
-          in: query
-          description: username that need to be remove a subscrib
-          example: username
-          required: true
-          schema:
-            type: string
-        - name: channelName
-          in: query
-          description: channel to remove a subscrib
-          example: channelName
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: successful operation
-        '400':
-          description: Invalid channelName or userName supplied
-        '404':
-          description: Channel or user not found
-
-components:
-  schemas:
-    User:
-      type: object
-      description: User
-      properties:
-        nickName:
-          type: string
-          description: User's nickName
-          example: [Nick]
-        username:
-          type: string
-          description: User's name
-          example: [Name]
-        email:
-          type: string
-          description: User's mail
-          example: [user@exampleMail.com]
-        subscribes:
-          type: array
-          description: User's subscribers list
-          items:
-            $ref: '#/components/schemas/Channel'
-    Channel:
-      type: object
-      description: Channel
-      properties:
-        name:
-          type: string
-          description: Channel's name
-          example: [ChannelName]
-        descrioption:
-          type: string
-          description: Descrioption of channel
-          example: [Channel about animals]
-        author:
-          $ref: '#/components/schemas/User'
-        subscribers:
-          type: array
-          description: List of subscribers (Users)
-          items:
-            $ref: '#/components/schemas/User'
-        createdAt:
-          type: string
-          format: date-time
-          description: CreatedAt
-          example: [12.12.2024]
-        language:
-          type: string
-          description: Main language
-          example: [english]
-        avatar:
-          type: string
-          description: Url to the picture
-          example: [url.png]
-        cathegory:
-          type: string
-          description:  Cathegory
-          example: [Cats]
-    FilteredChannel:
-      type: object
-      description: Channel to display in the list
-      properties:
-        name:
-          type: string
-          description: Channel's name
-          example: [ChannelName]
-        subscribersNumber:
-          type: integer
-          format: int64
-          description:  Number of subscribers
-          example: [110000]
-        language:
-          type: string
-          description: Main language
-          example: [english]
-        avatar:
-          type: string
-          description: Url to the picture
-          example: [url.png]
-        cathegory:
-          type: string
-          description:  Cathegory
-          example: [Cats]
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "VideoHosting",
+    "description": "VideoHosting sample application REST API",
+    "version": "v0.0.1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "subscription",
+      "description": "Subscription operation"
+    },
+    {
+      "name": "channel",
+      "description": "Channel operation"
+    },
+    {
+      "name": "user",
+      "description": "User operation"
+    }
+  ],
+  "paths": {
+    "/api/users/{id}": {
+      "put": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Updated user information",
+        "description": "Update user object in JSON format by name. userName will not be changed",
+        "operationId": "updateAppUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of user",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatedAppUserDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatedAppUserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels/{id}": {
+      "get": {
+        "tags": [
+          "channel"
+        ],
+        "summary": "Show channel",
+        "description": "Get channel information by channel id",
+        "operationId": "getChannel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of channel",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "channel"
+        ],
+        "summary": "Updated channel",
+        "description": "Update channel by channel id",
+        "operationId": "updateChannel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of channel",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatedChannelDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatedChannelDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Create user",
+        "description": "This POST method takes a json as input and creates an object in the database",
+        "operationId": "createAppUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppUserDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Successful operation. Object created.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAppUserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels": {
+      "get": {
+        "tags": [
+          "channel"
+        ],
+        "summary": "Show channels",
+        "description": "Get list of channels with pagination, filter of name, language, category.",
+        "operationId": "getAllChannels",
+        "parameters": [
+          {
+            "name": "channelName",
+            "in": "query",
+            "description": "Channel name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Travel"
+          },
+          {
+            "name": "channelLanguage",
+            "in": "query",
+            "description": "Channel language",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "RUSSIAN"
+          },
+          {
+            "name": "channelCategory",
+            "in": "query",
+            "description": "Channel category",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "animal"
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FilteredChannelDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "channel"
+        ],
+        "summary": "Create channel",
+        "description": "This POST method takes a json as input and creates an object in the database.",
+        "operationId": "createChannel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChannelDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Successful operation. Object created.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedChannelDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels/{channelId}/subscribe/{userId}": {
+      "post": {
+        "tags": [
+          "subscription"
+        ],
+        "summary": "Create subscription",
+        "description": "Create a user subscription to the channel",
+        "operationId": "subscribeUser",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "description": "Id of channel",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "Id of user",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Successful operation"
+          }
+        }
+      }
+    },
+    "/api/users/{userId}/subscriptions": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "User's subscription",
+        "description": "Get list of user subscriptions (without pagination, only channelName)",
+        "operationId": "getAllAppUserSubscriptions",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "Id of user",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChannelNameDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels/{channelId}/unsubscribe/{userId}": {
+      "delete": {
+        "tags": [
+          "subscription"
+        ],
+        "summary": "Create subscription",
+        "description": "Create a user subscription to the channel",
+        "operationId": "unsubscribeUser",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "description": "Id of channel",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "Id of user",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Successful operation"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpdatedAppUserDto": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string",
+            "description": "Nickname",
+            "example": "Alexis"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name",
+            "example": "Alexander"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email",
+            "example": "alex@example.m"
+          }
+        }
+      },
+      "UpdatedChannelDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of channel",
+            "example": "Zoo"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of channel",
+            "example": "Channel about animal"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Created",
+            "format": "date-time"
+          },
+          "mainLanguage": {
+            "type": "string",
+            "description": "Channel language",
+            "example": "1",
+            "enum": [
+              "ENGLISH",
+              "RUSSIAN"
+            ]
+          },
+          "base64Image": {
+            "type": "string",
+            "description": "Image of channel (base64)",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII="
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "Category",
+            "example": "Animal"
+          }
+        }
+      },
+      "CreateAppUserDto": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string",
+            "description": "Nickname",
+            "example": "Alexis"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name",
+            "example": "Alexander"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email",
+            "example": "alex@example.m"
+          }
+        }
+      },
+      "CreateChannelDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of channel",
+            "example": "Zoo"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of channel",
+            "example": "Channel about animal"
+          },
+          "authorId": {
+            "type": "integer",
+            "description": "Author of channel id",
+            "format": "int64",
+            "example": 1
+          },
+          "mainLanguage": {
+            "type": "string",
+            "description": "Channel language",
+            "example": "1",
+            "enum": [
+              "ENGLISH",
+              "RUSSIAN"
+            ]
+          },
+          "base64Image": {
+            "type": "string",
+            "description": "Image of channel (base64)",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII="
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "Category",
+            "example": "Animal"
+          }
+        }
+      },
+      "CreatedChannelDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of channel",
+            "example": "Zoo"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of channel",
+            "example": "Channel about animal"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Created",
+            "format": "date-time"
+          },
+          "authorId": {
+            "type": "integer",
+            "description": "Author of channel id",
+            "format": "int64",
+            "example": 1
+          },
+          "mainLanguage": {
+            "type": "string",
+            "description": "Channel language",
+            "example": "1",
+            "enum": [
+              "ENGLISH",
+              "RUSSIAN"
+            ]
+          },
+          "base64Image": {
+            "type": "string",
+            "description": "Image of channel (base64)",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII="
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "Category",
+            "example": "Animal"
+          }
+        }
+      },
+      "ChannelNameDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of channel",
+            "example": "Zoo"
+          }
+        }
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "FilteredChannelDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of channel",
+            "example": "Zoo"
+          },
+          "subscriberCount": {
+            "type": "integer",
+            "description": "Count of subscribers",
+            "format": "int64",
+            "example": 1
+          },
+          "mainLanguage": {
+            "type": "string",
+            "description": "Channel language",
+            "example": "1",
+            "enum": [
+              "ENGLISH",
+              "RUSSIAN"
+            ]
+          },
+          "base64Image": {
+            "type": "string",
+            "description": "Image of channel (base64)",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII="
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "Category",
+            "example": "Animal"
+          }
+        }
+      },
+      "ChannelDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of channel",
+            "example": "Zoo"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of channel",
+            "example": "Channel about animal"
+          },
+          "authorId": {
+            "type": "integer",
+            "description": "Author of channel id",
+            "format": "int64",
+            "example": 1
+          },
+          "subscriberCount": {
+            "type": "integer",
+            "description": "Count of subscribers",
+            "format": "int64",
+            "example": 1
+          },
+          "mainLanguage": {
+            "type": "string",
+            "description": "Channel language",
+            "example": "1",
+            "enum": [
+              "ENGLISH",
+              "RUSSIAN"
+            ]
+          },
+          "base64Image": {
+            "type": "string",
+            "description": "Image of channel (base64)",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII="
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "Category",
+            "example": "Animal"
+          }
+        }
+      }
+    }
+  }
+}
