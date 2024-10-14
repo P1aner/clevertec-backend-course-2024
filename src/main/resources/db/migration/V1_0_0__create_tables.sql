@@ -1,22 +1,20 @@
 CREATE TABLE IF NOT EXISTS "app_user"
 (
-    "id" bigserial NOT NULL,
-    "nickname" character varying(255),
+    "id" bigserial PRIMARY KEY,
+    "nickname" character varying(255) UNIQUE,
     "name" character varying(255),
-    "email" character varying(255),
-    CONSTRAINT "app_user_pkey" PRIMARY KEY (id)
+    "email" character varying(255)
 );
 
 CREATE TABLE IF NOT EXISTS "category"
 (
-    "id" bigserial NOT NULL,
-    "name" character varying(255),
-    CONSTRAINT "category_pkey" PRIMARY KEY (id)
+    "id" bigserial PRIMARY KEY,
+    "name" character varying(255) UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS "channel"
 (
-    "id" bigserial NOT NULL,
+    "id" bigserial PRIMARY KEY,
     "name" character varying(255),
     "description" character varying(255),
     "author_id" bigserial,
@@ -24,7 +22,6 @@ CREATE TABLE IF NOT EXISTS "channel"
     "main_language" smallint,
     "base64image" character varying(255),
     "category_id" bigserial,
-    CONSTRAINT "channel_pkey" PRIMARY KEY (id),
     CONSTRAINT "channel_category" FOREIGN KEY (category_id)
         REFERENCES "category" (id) MATCH SIMPLE
         ON UPDATE NO ACTION
@@ -38,8 +35,8 @@ CREATE TABLE IF NOT EXISTS "channel"
 
 CREATE TABLE IF NOT EXISTS "channel_subscribers"
 (
-    "subscribers_id" bigserial NOT NULL,
-    "subscriptions_id" bigserial NOT NULL,
+    "subscribers_id" bigserial,
+    "subscriptions_id" bigserial,
     CONSTRAINT "channel_subscribers_pkey" PRIMARY KEY (subscribers_id, subscriptions_id),
     CONSTRAINT "subscrib_channel" FOREIGN KEY (subscriptions_id)
         REFERENCES "channel" (id) MATCH SIMPLE

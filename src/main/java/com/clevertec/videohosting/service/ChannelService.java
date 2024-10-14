@@ -46,7 +46,7 @@ public class ChannelService {
     }
 
     public List<FilteredChannelDto> getFilteredChannels(String channelName, Language language, String categoryName, Pageable pageable) {
-        Category category = categoryRepository.findByName(categoryName).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        Category category = categoryRepository.findByName(categoryName).orElse(null);
         Specification<Channel> spec = ChannelSpecification.filterBy(channelName, language, category);
         Page<Channel> channelPage = channelRepository.findAll(spec, pageable);
         return channelMapper.toFilteredhannelDtoList(channelPage.getContent());

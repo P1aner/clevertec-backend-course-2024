@@ -1,7 +1,7 @@
 package com.clevertec.videohosting.repository;
 
-import com.clevertec.videohosting.model.Channel;
 import com.clevertec.videohosting.model.Category;
+import com.clevertec.videohosting.model.Channel;
 import com.clevertec.videohosting.model.enums.Language;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;

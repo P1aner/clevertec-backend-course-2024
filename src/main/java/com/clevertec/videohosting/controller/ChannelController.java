@@ -8,6 +8,7 @@ import com.clevertec.videohosting.dto.UpdatedChannelDto;
 import com.clevertec.videohosting.model.Category;
 import com.clevertec.videohosting.model.enums.Language;
 import com.clevertec.videohosting.service.ChannelService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/channels")
 @RequiredArgsConstructor
+@Tag(name = "channel", description = "Channel operation")
 public class ChannelController {
     private final ChannelService channelService;
 

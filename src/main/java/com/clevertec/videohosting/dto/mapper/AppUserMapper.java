@@ -17,6 +17,5 @@ public interface AppUserMapper {
 
     AppUser toAppUser(CreateAppUserDto createAppUserDto);
 
-
     void updateAppUserFromDto(UpdatedAppUserDto dto, @MappingTarget AppUser appUser);
 }

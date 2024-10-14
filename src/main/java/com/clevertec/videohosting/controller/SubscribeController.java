@@ -1,6 +1,7 @@
 package com.clevertec.videohosting.controller;
 
 import com.clevertec.videohosting.service.SubscribeService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/channels")
 @RequiredArgsConstructor
+@Tag(name = "subscription", description = "Subscription operation")
 public class SubscribeController {
     private final SubscribeService subscribeService;
 
