@@ -5,14 +5,10 @@ import com.clevertec.videohosting.dto.CreateAppUserDto;
 import com.clevertec.videohosting.dto.UpdatedAppUserDto;
 import com.clevertec.videohosting.service.AppUserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.RouterOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,21 +30,31 @@ public class AppUserController {
 
     @PostMapping
     @Operation(summary = "Create user", description = "This POST method takes a json as input and creates an object in the database")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successful operation. Object created.")
-    })
+    @ApiResponse(responseCode = "201", description = "Successful operation. Object created.")
     public ResponseEntity<CreateAppUserDto> createAppUser(@RequestBody CreateAppUserDto appUserDto) {
         return new ResponseEntity<>(appUserService.createAppUser(appUserDto), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UpdatedAppUserDto> updateAppUser(@PathVariable Long id,
+    @Operation(summary = "Updated user information", description = "Update user object in JSON format by name. userName will not be changed")
+    @ApiResponse(responseCode = "200", description = "Successful operation")
+    public ResponseEntity<UpdatedAppUserDto> updateAppUser(@PathVariable
+                                                           @Parameter(
+                                                                   description = "Id of user",
+                                                                   example = "1",
+                                                                   required = true) Long id,
                                                            @RequestBody UpdatedAppUserDto updatedAppUserDto) {
         return ResponseEntity.ok(appUserService.updateAppUser(id, updatedAppUserDto));
     }
 
     @GetMapping("/{userId}/subscriptions")
-    public ResponseEntity<List<ChannelNameDto>> getAllAppUserSubscriptions(@PathVariable Long userId) {
+    @Operation(summary = "User's subscription", description = "Get list of user subscriptions (without pagination, only channelName)")
+    @ApiResponse(responseCode = "200", description = "Successful operation")
+    public ResponseEntity<List<ChannelNameDto>> getAllAppUserSubscriptions(@PathVariable
+                                                                           @Parameter(
+                                                                                   description = "Id of user",
+                                                                                   example = "1",
+                                                                                   required = true) Long userId) {
         return ResponseEntity.ok(appUserService.getAllUserSubscriptions(userId));
     }
 }

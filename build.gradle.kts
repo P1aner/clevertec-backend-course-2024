@@ -7,6 +7,8 @@ plugins {
 
 group = "com.clevertec"
 version = "0.0.1-SNAPSHOT"
+val mapstructVersion = "1.6.2"
+val springDocOpenApi = "2.6.0"
 
 java {
 	toolchain {
@@ -29,17 +31,17 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.flywaydb:flyway-database-postgresql")
+	implementation("org.mapstruct:mapstruct:$mapstructVersion")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApi")
+
 	compileOnly("org.projectlombok:lombok")
+
 	runtimeOnly("org.postgresql:postgresql")
+
 	annotationProcessor("org.projectlombok:lombok")
+	annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+
 	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
-
-	implementation("org.mapstruct:mapstruct:1.6.2")
-	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.2")
-	implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
-
-
 }
 
 tasks.withType<Test> {

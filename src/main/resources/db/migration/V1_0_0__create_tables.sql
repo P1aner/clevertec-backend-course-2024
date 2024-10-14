@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS "channel"
     "author_id" bigserial,
     "created_at" timestamp without time zone NOT NULL DEFAULT now(),
     "main_language" smallint,
-    "base64image" character varying(255),
+    "base64image" character varying(2000),
     "category_id" bigserial,
     CONSTRAINT "channel_category" FOREIGN KEY (category_id)
         REFERENCES "category" (id) MATCH SIMPLE

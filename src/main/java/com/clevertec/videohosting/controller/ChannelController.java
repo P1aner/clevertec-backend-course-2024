@@ -5,9 +5,11 @@ import com.clevertec.videohosting.dto.CreateChannelDto;
 import com.clevertec.videohosting.dto.CreatedChannelDto;
 import com.clevertec.videohosting.dto.FilteredChannelDto;
 import com.clevertec.videohosting.dto.UpdatedChannelDto;
-import com.clevertec.videohosting.model.Category;
 import com.clevertec.videohosting.model.enums.Language;
 import com.clevertec.videohosting.service.ChannelService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -31,25 +33,53 @@ public class ChannelController {
     private final ChannelService channelService;
 
     @PostMapping
+    @Operation(summary = "Create channel", description = "This POST method takes a json as input and creates an object in the database.")
+    @ApiResponse(responseCode = "201", description = "Successful operation. Object created.")
     public ResponseEntity<CreatedChannelDto> createChannel(@RequestBody CreateChannelDto createChannelDTO) {
         return ResponseEntity.ok(channelService.createChannel(createChannelDTO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UpdatedChannelDto> updateChannel(@PathVariable Long id,
+    @Operation(summary = "Updated channel", description = "Update channel by channel id")
+    @ApiResponse(responseCode = "200", description = "Successful operation")
+    public ResponseEntity<UpdatedChannelDto> updateChannel(@PathVariable
+                                                           @Parameter(
+                                                                   description = "Id of channel",
+                                                                   example = "1",
+                                                                   required = true) Long id,
                                                            @RequestBody UpdatedChannelDto updatedChannelDto) {
         return ResponseEntity.ok(channelService.updateChannel(id, updatedChannelDto));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ChannelDto> getChannel(@PathVariable Long id) {
+    @Operation(summary = "Show channel", description = "Get channel information by channel id")
+    @ApiResponse(responseCode = "200", description = "Successful operation")
+    public ResponseEntity<ChannelDto> getChannel(@PathVariable
+                                                 @Parameter(
+                                                         description = "Id of channel",
+                                                         example = "1",
+                                                         required = true) Long id) {
         return ResponseEntity.ok(channelService.getChannelDetails(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<FilteredChannelDto>> getAllChannels(@RequestParam(required = false) String channelName,
-                                                                   @RequestParam(required = false) String channelLanguage,
-                                                                   @RequestParam(required = false) String channelCategory,
+    @Operation(summary = "Show channels", description = "Get list of channels with pagination, filter of name, language, category.")
+    @ApiResponse(responseCode = "200", description = "Successful operation")
+    public ResponseEntity<List<FilteredChannelDto>> getAllChannels(@RequestParam(required = false)
+                                                                   @Parameter(
+                                                                           name = "channelName",
+                                                                           description = "Channel name",
+                                                                           example = "Travel") String channelName,
+                                                                   @RequestParam(required = false)
+                                                                   @Parameter(
+                                                                           name = "channelLanguage",
+                                                                           description = "Channel language",
+                                                                           example = "RUSSIAN") String channelLanguage,
+                                                                   @RequestParam(required = false)
+                                                                   @Parameter(
+                                                                           name = "channelCategory",
+                                                                           description = "Channel category",
+                                                                           example = "animal") String channelCategory,
                                                                    Pageable pageable) {
         Language language = null;
         if (channelLanguage != null) language = Language.valueOf(channelLanguage);
