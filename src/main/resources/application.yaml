@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: "session-storage"
+  data:
+    mongodb:
+      host: "mongoserver.example.com"
+      database: "test"
+      username: "user"
+      password: "secret"
