@@ -3,7 +3,7 @@ spring:
     name: "session-storage"
   data:
     mongodb:
-      host: "mongoserver.example.com"
-      database: "test"
-      username: "user"
-      password: "secret"
+      url: "mongodb://localhost:27017"
+      database: "session"
+      username: "root"
+      password: "root"
