@@ -1,9 +1,0 @@
-spring:
-  application:
-    name: "session-storage"
-  data:
-    mongodb:
-      url: "mongodb://localhost:27017"
-      database: "session"
-      username: "root"
-      password: "root"
