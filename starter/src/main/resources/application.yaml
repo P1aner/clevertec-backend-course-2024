@@ -1,0 +1,10 @@
+starter:
+  uli-config:
+    protocol: http://
+    domain: localhost:8080
+    pathToObtainSession: /sessions/current
+    pathToCreateSession: /sessions/create
+    loginParameter: ?login={log}
+  blackList:
+    - "username"
+    - "login"
