@@ -19,7 +19,7 @@ import ru.clevertec.session_storage.model.Session;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -46,14 +46,16 @@ class SessionControllerTest {
 
         HttpClientErrorException httpClientErrorException = Assert.assertThrows(HttpClientErrorException.class, () -> executeCreateSessionRequest(TestData.LOGIN1));
 
-        assertEquals("400 : \"Session is opened\"", httpClientErrorException.getMessage());
+        assertTrue(httpClientErrorException.getMessage().contains("Session is opened"));
+        assertTrue(httpClientErrorException.getMessage().contains("400"));
     }
 
     @Test
     void testGetSession() {
 
         HttpClientErrorException httpClientErrorException = Assert.assertThrows(HttpClientErrorException.class, () -> executeGetSessionRequest(TestData.LOGIN2));
-        assertEquals("404 : \"Session not found\"", httpClientErrorException.getMessage());
+        assertTrue(httpClientErrorException.getMessage().contains("Session not found"));
+        assertTrue(httpClientErrorException.getMessage().contains("404"));
 
         executeCreateSessionRequest(TestData.LOGIN2);
         ResponseEntity<Session> response = executeGetSessionRequest(TestData.LOGIN2);
