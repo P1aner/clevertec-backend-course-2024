@@ -26,6 +26,7 @@ public class SessionListener {
     public Session getSession(String login) {
         String uri = starterConfig.protocol()
                 + starterConfig.domain()
+                + starterConfig.port()
                 + starterConfig.pathToObtainSession()
                 + starterConfig.loginParameter();
         return restClient
@@ -45,6 +46,7 @@ public class SessionListener {
     private Session createSession(String login) {
         String uri = starterConfig.protocol()
                 + starterConfig.domain()
+                + starterConfig.port()
                 + starterConfig.pathToCreateSession()
                 + starterConfig.loginParameter();
         return restClient

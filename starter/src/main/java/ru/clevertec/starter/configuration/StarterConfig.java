@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record StarterConfig(
         String protocol,
         String domain,
+        String port,
         String pathToObtainSession,
         String pathToCreateSession,
         String loginParameter
