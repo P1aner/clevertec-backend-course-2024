@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: "session-storage"
+  data:
+    mongodb:
+      uri: "mongodb://localhost:27017"
+      database: "session"
+      username: "root"
+      password: "root"
+      authentication-database: admin
