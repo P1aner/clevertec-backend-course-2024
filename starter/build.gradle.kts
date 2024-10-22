@@ -6,9 +6,10 @@ plugins {
 group = "ru.clevertec"
 version = "0.0.1-SNAPSHOT"
 
-val springBootVersion = "3.3.4";
-val jacksonVersion = "2.18.0";
-val lombokVersion = "1.18.34";
+val springBootVersion = "3.3.4"
+val jacksonVersion = "2.18.0"
+val lombokVersion = "1.18.34"
+val wiremockVersion = "3.3.1"
 
 java {
     toolchain {
@@ -35,6 +36,9 @@ dependencies {
     compileOnly("org.projectlombok:lombok:${lombokVersion}")
 
     annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation("org.wiremock:wiremock:$wiremockVersion")
 }
 
 tasks.withType<Test> {
